@@ -52,7 +52,7 @@ gbd_read <- function(path = as.character(getOption("better.gbd_path"))) {
   y <- tibble::tibble()
   for (i in FILES_GBD_DATA) {
     #browser()
-    dfi <- readr::read_csv(i)
+    dfi <- suppressMessages(readr::read_csv(i))
     y <- dplyr::bind_rows(
       y,
       dfi
@@ -85,7 +85,7 @@ gbd_read <- function(path = as.character(getOption("better.gbd_path"))) {
 gbd_clean <- function(x) {
   y <- x
   names(y) <- stringr::str_remove(names(y), "_name")
-  y <-dplyr::select(y,-dplyr::ends_with("_id"), tidyselect::everything())
+  y <- dplyr::select(y,-dplyr::ends_with("_id"), tidyselect::everything())
   return(y)
 }#; gbd_clean(gbd)
 
@@ -118,32 +118,32 @@ gbd_codebook_read <- function(path = getOption("better.gbd_path")) {
   if (length(path) == 0) {
     stop("`path` has length 0.")
   }
-  gbd_cb <- readr::read_csv(
+  gbd_cb <- suppressMessages(readr::read_csv(
     as.character(utils::tail(stringr::str_subset(
       list_recursive_path_names(path),
       "/IHME_GBD_20\\d{2}_CODEBOOK_Y\\d{4}M\\d{2}D\\d{2}\\.CSV"
     ),1))
-  )
+  ))
 
-  gbd_cb_measure <- readxl::read_excel(
+  gbd_cb_measure <- suppressMessages(readxl::read_excel(
     as.character(utils::tail(stringr::str_subset(
       list_recursive_path_names(path),
       "/IHME_GBD_20\\d{2}_MEASURE_METRIC_DEFINITIONS_Y\\d{4}M\\d{2}D\\d{2}\\.XLSX"
     ),1)),
     skip=1
-  )
-  gbd_cb_risk <- readxl::read_excel(
+  ))
+  gbd_cb_risk <- suppressMessages(readxl::read_excel(
     utils::tail(stringr::str_subset(
       list_recursive_path_names(path),
       "/IHME_GBD_20\\d{2}_REI_HIERARCHY_Y\\d{4}M\\d{2}D\\d{2}\\.XLSX"
     ),1)
-  )
-  gbd_cb_cause <- readxl::read_excel(
+  ))
+  gbd_cb_cause <- suppressMessages(readxl::read_excel(
     utils::tail(stringr::str_subset(
       list_recursive_path_names(path),
       "/IHME_GBD_20\\d{2}_CAUSE_HIERARCHY_Y\\d{4}M\\d{2}D\\d{2}\\.XLSX"
     ),1)
-  )
+  ))
 
   y <- list(
     gbd_cb = gbd_cb,
@@ -253,11 +253,12 @@ gbd_download <- function(path = getOption("better.gbd_path")) {
     results = "https://vizhub.healthdata.org/gbd-results/"
   )
   message(
-    "The page to download data and the user guide are opened in your browser. Your GBD data folder is also opened. Download the data you want, and save it somewhere in the GBD data folder or a subfolder. It doesn't matter where, as long as you don't change the name of the data file.\n\nWebpages opened:\n- ",
-    paste0(purrr::map2_chr(
+    stringr::str_wrap("The page to download data and the user guide are opened in your browser. Your GBD data folder is also opened. Download the data you want, and save it somewhere in the GBD data folder or a subfolder. It doesn't matter where, as long as you don't change the name of the data file."),
+    "\n\nWebpages opened:\n- ",
+    paste0(stringr::str_wrap(purrr::map2_chr(
       GBD_SITES, names(GBD_SITES), ~{paste0(.y,": ",.x)}
-      ),collapse="\n- "),
-    "\n\nFolder opened:\n", path
+      )), collapse="\n- "),
+    "\n\nFolder opened:\n", stringr::str_wrap(path)
   )
   gbd_open(path = path)
   purrr::walk(GBD_SITES, utils::browseURL)

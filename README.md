@@ -56,90 +56,27 @@ these names.
 library(better)
 
 # Download, clean and save GBD data and codebooks
+
 gbd_download()
-#> The page to download data and the user guide are opened in your browser. Your GBD data folder is also opened. Download the data you want, and save it somewhere in the GBD data folder or a subfolder. It doesn't matter where, as long as you don't change the name of the data file.
+#> The page to download data and the user guide are opened in your browser.
+#> Your GBD data folder is also opened. Download the data you want, and save it
+#> somewhere in the GBD data folder or a subfolder. It doesn't matter where, as
+#> long as you don't change the name of the data file.
 #> 
 #> Webpages opened:
-#> - guide: https://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Results_Tool_User_Guide_2019.pdf
+#> - guide: https://ghdx.healthdata.org/sites/default/files/ihme_query_tool/
+#> GBD_Results_Tool_User_Guide_2019.pdf
 #> - main: https://ghdx.healthdata.org/gbd-2019
 #> - results: https://vizhub.healthdata.org/gbd-results/
 #> 
 #> Folder opened:
-#> /Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects/Health Projects/Health Team/Public datasets on health/Global Burden of Disease Study Data
+#> /Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects/Health
+#> Projects/Health Team/Public datasets on health/Global Burden of Disease Study
+#> Data
 gbd_save()
-#> Rows: 324 Columns: 18
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (7): measure_name, location_name, sex_name, age_name, cause_name, rei_n...
-#> dbl (11): measure_id, location_id, sex_id, age_id, cause_id, rei_id, metric_...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 504 Columns: 16
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (6): measure_name, location_name, sex_name, age_name, cause_name, metri...
-#> dbl (10): measure_id, location_id, sex_id, age_id, cause_id, metric_id, year...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 522 Columns: 16
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (6): measure_name, location_name, sex_name, age_name, cause_name, metri...
-#> dbl (10): measure_id, location_id, sex_id, age_id, cause_id, metric_id, year...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 36 Columns: 14
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr (5): measure_name, location_name, sex_name, age_name, metric_name
-#> dbl (9): measure_id, location_id, sex_id, age_id, metric_id, year, val, uppe...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 1134 Columns: 18
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (7): measure_name, location_name, sex_name, age_name, cause_name, rei_n...
-#> dbl (11): measure_id, location_id, sex_id, age_id, cause_id, rei_id, metric_...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 2412 Columns: 18
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (7): measure_name, location_name, sex_name, age_name, cause_name, rei_n...
-#> dbl (11): measure_id, location_id, sex_id, age_id, cause_id, rei_id, metric_...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 504 Columns: 16
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (6): measure_name, location_name, sex_name, age_name, cause_name, metri...
-#> dbl (10): measure_id, location_id, sex_id, age_id, cause_id, metric_id, year...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 360 Columns: 16
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr  (6): measure_name, location_name, sex_name, age_name, cause_name, metri...
-#> dbl (10): measure_id, location_id, sex_id, age_id, cause_id, metric_id, year...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-#> Rows: 1759 Columns: 19
-#> ── Column specification ────────────────────────────────────────────────────────
-#> Delimiter: ","
-#> chr (19): Variable:, measure_id, measure_name, location_id, location_name, s...
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 # Load and analyze
+
 gbd_list <- gbd_load()
 
 str(gbd_list, max.level = 2) # nested lists

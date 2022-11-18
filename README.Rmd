@@ -52,10 +52,12 @@ Download the Global Burden of Disease project data. The `gbd_download()` conveni
 library(better)
 
 # Download, clean and save GBD data and codebooks
+
 gbd_download()
 gbd_save()
 
 # Load and analyze
+
 gbd_list <- gbd_load()
 
 str(gbd_list, max.level = 2) # nested lists
