@@ -11,3 +11,17 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 URL: https://github.com/janlindemans/better
 BugReports: https://github.com/janlindemans/better/issues
+Suggests: 
+    testthat (>= 3.0.0),
+    withr
+Config/testthat/edition: 3
+Imports: 
+    dplyr,
+    purrr,
+    readr,
+    readxl,
+    snakecase,
+    stringr,
+    tibble,
+    tidyselect,
+    utils

@@ -1,0 +1,72 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# better
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of better is to make the world a better place through impact evaluation.
+
+## Installation
+
+You can install the development version of better from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("janlindemans/better")
+```
+
+## Set up
+
+Create a folder to save the Global Burden of Disease project data to. You can create it anywhere and name it anything. It may be something like: `Users/johnwilliam/data/Global Burdern of Disease Study data`. Let's call it the GBD folder.
+
+Enter the path of the GBD folder as the default GBD path in your `.Rprofile` file - it will be used by most `better` functions.
+
+```{r}
+options(better.gbd_path = paste0(
+  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
+  "/Health Projects/Health Team/Public datasets on health",
+  "/Global Burden of Disease Study Data" 
+))
+```
+If you haven't used `.Rprofile` before, it's a hidden file located somewhere like here: `Users/johnwilliam/.Rprofile`. Learn more about `.Rprofile` on [the Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
+
+Download the Global Burden of Disease project data. The `gbd_download()` convenience function (see below) will open the website where you can download it. It also opens some other useful pages, as well as your GBD folder where you'll want to store the data. You can store it anywhere in (a subfolder of) your GBD folder. Just don't change the names of the data files and codebook files, because `better` searches for them using these names.
+
+## Usage
+
+```{r}
+library(better)
+
+# Download, clean and save GBD data and codebooks
+gbd_download()
+gbd_save()
+
+# Load and analyze
+gbd_list <- gbd_load()
+
+str(gbd_list, max.level = 2) # nested lists
+attach(gbd_list) # easier
+gbd
+
+str(gbd_meta, max.level = 2) # nested lists
+attach(gbd_meta) # easier
+gbd_cb
+gbd_cb_cause
+gbd_cb_measure
+gbd_cb_risk
+```
+
