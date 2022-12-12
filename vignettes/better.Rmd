@@ -1,0 +1,673 @@
+---
+title: "Introduction to better"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{better}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# TODO ???
+# allow gbd_filter to take df as first argument
+# print_nr: ALLOW MANUAL COMMA INSERTION
+
+options(
+  rmarkdown.html_vignette.check_title = FALSE,
+  better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data"
+  )
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+#devtools::build_rmd("vignettes/gbd.Rmd")
+```
+
+## Introduction
+
+This package helps you to better guestimate the effect of health nudges, that is, of behavioral interventions targeted at health behaviors. And make the world a *better* place! 
+
+## Set up
+
+*If you followed the instructions when installing, you should have already set things up. Just in case you haven't yet, I'll repeat the set-up instructions here.*
+
+`better` has several functions that rely on data from the Global Burden of Disease study (GBD). This requires some setup.
+
+### Download Global Burden of Disease codebook and data
+
+Download the **GBD codebook** from the website of the Institute for Health Metrics and Evaluation (IHME) by clicking [here](
+https://www.healthdata.org/sites/default/files/files/Data_viz/GBD_2019_Data_Tools_Guide.zip). 
+
+Save the downloaded folder `IHME_GBD_2019_CODEBOOK` into a root folder in which you'll later also save GBD data. Let's call this root folder the *GBD folder*. You can create the GBD folder anywhere and name it whatever you like. Your GBD folder could be something like: `Users/johnwilliam/datasets/Global Burden of Disease`, with the codebook folder `Users/johnwilliam/datasets/Global Burden of Disease/IHME_GBD_2019_CODEBOOK`.
+
+Download your first **GBD data** from the Global Health Data Exchange website. Click [here](https://vizhub.healthdata.org/gbd-results/) to go to the website. 
+
+You'll need to create an account first. Click `Sign in`, then `Register`, etc.  
+
+Then go back to the [GBD Results page](https://vizhub.healthdata.org/gbd-results/). It's a huge database, so you can't download everything. 
+
+Start by downloading a basic dataset on *causes of death*, with the following parameters in the drop-down menus on the page:
+
+* `GBD Estimate`: Keep that one as is, so `Cause of death or injury`.
+* `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs` from the drop-down.
+* `Metric`: Fine as is, keep all three.
+* `Cause`: Keep `All causes`, and add `Cardiovascular diseases` from the drop-down, under `Non-communicable diseases`, and `Diabetes and kidney diseases`.
+* `Location`: Keep `Global`, and add `Low SDI`, `Middle SDI`, and `High SDI`, and `United States of America` (under `High-income North America`) and `Latin America and Caribbean` (below `Western Europe`).
+* `Ages`: Keep `All ages`, and add `Age-standardized`, `<20 years`, `20+ years`, `<70 years` and `70+ years`.
+* `Sex`: Keep `Both`, and add `Male` and `Female`.
+* `Year`: Keep `2019`, and add `2009`.
+
+Then click `Download`, and, for `Include ID Values`, you can keep `Both`. When it says "You can also monitor progress `here`", click `here` and then `Download`. 
+
+Then go back by clicking the left arrow on top of the page, to the left of `Data Download`. It will take you back to the Search page, where you just entered all these parameters. It will remember all these parameters, so it's best you really go back like I described. 
+
+Now download the same dataset, but with the following parameters:
+
+* `Measure`: Select `YLLs`, `Prevalence`, and `Incidence`.
+
+After you did that, go back and download a dataset on *risk factors*:
+
+* `GBD Estimate`: Select `Risk factor`. 
+* `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs`. 
+* `Metric`: Fine as is, keep all three.
+* `Risk`: Keep `All risk factors`, add `behavioral risks`, `Tobacco` and `Dietary risks`.
+* `Cause` until `Year`: Keep it all as is, if it remembered your selections from the dataset on causes of death (see above).
+
+After you did that, go back, and download the same dataset but with `Measure` being `YLLs`.
+
+After you did that, go back and download a dataset on *summary exposure values*:
+* `GBD Estimate`: Select `Summary exposure values (SEV)`.
+* For `Measure` and `Metric`, you won't have any choice.
+* `Risk` until `Year`: Keep it all as is, if it remembered your selections from earlier on (see above).
+
+After unzipping, the downloaded data folder should have a name similar to this: `IHME-GBD_2019_DATA-64c5a7b3-1`. Store this data folder anywhere in (a subfolder of) your GBD folder. For instance: `Users/johnwilliam/datasets/Global Burden of Disease/Raw GBD data/IHME-GBD_2019_DATA-64c5a7b3-1`. You'll do the same for future data downloads. Just don't change the names of the data files, and codebook files for that matter, because `better` searches for them using these names.
+
+### Set global option in your `.Rprofile` file
+
+Enter the path of your GBD folder (e.g., `Users/johnwilliam/datasets/Global Burden of Disease`) as the default GBD path via global options set in your `.Rprofile` file. It will be used by several `better` functions. It is not required, since you can also set global options manually in each session, or even set the path manually for each function call (see below). But it's easier to take care of this once and for all in `.Rprofile`. 
+
+It will look like this:
+
+```{r, eval = FALSE}
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease")
+```
+
+If you haven't used `.Rprofile` before, it's a hidden file with code R runs at startup. It's located somewhere somewhere similar to this: `Users/johnwilliam/.Rprofile`. Learn more about `.Rprofile` on [the Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
+
+## Quick intro to effects
+
+The main purpose of `better` is to help you better guestimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. 
+
+Imagine you are designing a public health campaign. You are thinking about focusing on preventing cardiovascular diseases, and you are considering making information about healthy lifestyle more accessible. What effects can you expect from a campaign like that? This is how we would do it with `better`.
+
+First, we look up the effect of an information nudge on health behavior.
+
+```{r}
+library(tidyverse)
+library(better)
+nudge_to_behavior(nudge = "information", behavior = "health") 
+```
+
+This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior(nudge = "information", behavior = "health")$value`.
+
+Second, as an intermediate step, we translate Cohen's *d* into a percentage point difference.
+
+```{r}
+nudge_to_behavior(nudge = "information", behavior = "health") %>%
+  behavior_cd_to_pp
+```
+
+This gives us a decrease of `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% {round(abs(.$value),1)}` percentage points.
+
+Finally, we can get our guestimate of the effect:
+
+```{r}
+nudge_to_behavior(nudge = "information", behavior = "health") %>%
+  behavior_cd_to_pp %>%
+  behavior_to_disease("cardiovascular diseases")
+```
+
+We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% behavior_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
+
+Note that this is based on the following statistic:
+
+```{r}
+gbd_describe(cause = "cardiovascular diseases")
+```
+
+Let's see, what if we would shift the focus of our intervention to diabetes and kidney diseases?
+
+```{r}
+nudge_to_behavior(nudge = "information", behavior = "health") %>%
+  behavior_cd_to_pp %>%
+  behavior_to_disease("diabetes and kidney diseases")
+```
+
+What if we tried a structural nudge?
+
+```{r}
+nudge_to_behavior(nudge = "structure", behavior = "health") %>%
+  behavior_cd_to_pp %>%
+  behavior_to_disease("diabetes and kidney diseases")
+```
+
+To organize:
+
+```{r}
+gbd_cb <- gbd_codebook()
+nudge_cb <- nudge_codebook()
+nudge_cb$nudge
+nudge_cb$behavior
+```
+
+
+## Quick intro to the Global Burden of Disease dataset
+
+The GBD dataset contains data on death and disability, the diseases and injuries that cause them, and the risk factors for these causes.
+
+```{r}
+gbd
+gbd_variables()
+```
+
+The `measure` variable refers to the measure of death and/or disability.
+
+```{r}
+unique(gbd$measure)
+gbd_measures() %>%
+  select(measure, explain)
+```
+
+The `metric` variable refers to the measure of death and/or disability.
+
+```{r}
+unique(gbd$metric)
+gbd_measures() %>%
+  select(measure, number, percent, rate)
+```
+
+```{r}
+```
+
+
+The `cause` variable refers to the cause of death or disability.
+
+```{r}
+
+unique(gbd$cause)
+```
+
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+## Clean, save and load
+
+`better` has functions that will clean the GBD data and codebook, and save it as a `gbd_dataset` object into an `.rds` file. You can then easily read-in this file.
+
+```{r, eval = FALSE}
+library(tidyverse) # for convenient tibble printing and more
+library(better)
+gbd_save()
+gbd <- gbd_read()
+gbd
+```
+```{r, echo = FALSE}
+library(tidyverse)
+library(better)
+stopifnot(nchar(options()$better.gbd_path) > 0) # to
+#gbd_save() # takes too long
+warning()
+gbd <- gbd_read()
+gbd
+stopifnot(nrow(gbd) > 0)
+```
+
+```{r, echo = FALSE}
+# FOR TESTING
+# stopifnot(nrow(gbd) > 0)
+# get("gbd")
+# t1 <- function(x) {
+#   get("gbd")
+# }
+# t1()
+# stopifnot(nrow(t1()) > 0)
+# #stop(nrow(gbd))
+# gbd_filter(cause = "cardiovascular diseases") # many columns...
+```
+
+Note I called the returned list `gbd`. It contains data (`.$gbd_data`) and the codebook (`.$gbd_codebook`). It will be the main input for several `better` functions, like the function discussed in the next section. 
+
+## Get values from the GBD data
+
+The core of the package is the `better::gbd_*` family of functions, revolving around the Global Burden of Disease dataset. The GBD *dataset* consists of the GBD *data* and the GBD *codebook*. In `better`, this dataset is available as the object `gbd`. `gbd` is a dataframe with a "codebook" attribute. `better` also gives the GBD dataset its own class, namely, `better_gbd`. The most important reason is that `better_gbd` objects are printed in a special way. 
+
+`better::gbd_filter` gets values from the GBD data. 
+
+By default, it uses `gbd` (which should be the `gbd_dataset` object) for its `data` argument.
+
+```{r}
+gbd_filter(cause = "cardiovascular diseases") # many columns...
+```
+
+Let's run it without specifying any of the parameters, sticking to the defaults. 
+
+...
+
+In case you don't know, `rei` stands for *risks, etiologies and impairments* in GBD-speak, and `val` is the value.
+
+```{r}
+gbd_filter(rei = "behavioral risks")
+```
+
+Yay, we learned something! What we found here is that behavioral risks cause a population of 100,000 to lose `r gbd %>% gbd_filter(rei = "behavioral risks") %>% pull(val) %>% round %>% format(big.mark=",")` Disability-Adjusted Life Years (DALYs) in one year! That's a lot of life years. 
+
+```{r}
+gbd_filter(cause = "cardiovascular diseases", rei = NA, measure = c("deaths", "DALYs"))
+gbd_filter(cause = "cardiovascular diseases", rei = c("behavioral risks", "all risk factors"))
+```
+
+## Doing things differently
+
+If so far so good, you can ignore this section. It's about doing things a bit differently - but I don't recommend that.
+
+If you haven't set global options in `.Rprofile`, or in your current R session, you can still manually enter the path to your GBD folder.
+
+```{r, eval = FALSE}
+gbd_manual <- gbd_read("/Users/johnwilliam/datasets/Global Burden of Disease")
+```
+```{r, echo = FALSE, message = FALSE}
+path_gbd <- paste0(
+  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
+  "/Health Projects/Health Team/Public datasets on health",
+  "/Global Burden of Disease Study Data"
+)
+gbd_manual <- gbd_read(path_gbd)
+```
+
+The result is the same:
+
+```{r}
+gbd_filter(data = gbd_manual) %>% 
+  select(cause:measure)
+```
+
+The same goes for `better::gbd_save()`.
+
+But there's little reason here to always explicitly feed these functions the path. Now, `better` allows a more implicit style in other places too, but there I don't recommend it. First, rather than `gbd <- better::gbd_read()`, you can simply write `better::gbd_read(load = TRUE)` or `better::gbd_load(load)`, and it will create `gbd` for you. Second, rather than `gbd %>% better::gbd_filter(rei = "behavioral risks")`, you can simply write `better::gbd_filter(rei = "behavioral risks")`, because by default `better::gbd_filter` looks for an object called `gbd`. But I don't recommend any of these implicit calls, because they are not clear about what's going on in your global environment.
+
+```{r}
+rm(gbd)
+exists("gbd")
+gbd_load()
+exists("gbd")
+```
+
+## Browse categories and download more data
+
+You can browse more causes and risk factors in the full dataset on the website. If you see anything of interest, you can go download the data. `better` has functions that help you browse the codebook for all available causes and risk factors. 
+
+Here's a browser for causes:
+
+```{r, eval = FALSE, echo = FALSE}
+# for browsing, enter 2 and then q
+gbd_browse_cause()
+# copy output on clipboard
+capture(cat(clipboard()),collapse="\n#> ")
+# de newlines at user input
+```
+```{r, eval = FALSE}
+gbd_browse_cause()
+#> Category:
+#> # A tibble: 1 × 9
+#>   cause_id cause_name parent_id parent_name level cause_outline sort_order yll_only yld_only
+#>      <dbl> <chr>          <dbl> <chr>       <dbl> <chr>              <dbl> <chr>    <chr>   
+#> 1      294 All causes       294 All causes      0 Total                  1 NA       NA      
+#> 
+#> Data already downloaded for this parent category:
+#> # A tibble: 1,392 × 19
+#>   cause      rei    metric     val measure     upper   lower locat…¹ sex   age    year measu…² locat…³ sex_id age_id cause…⁴
+#>   <chr>      <chr>  <chr>    <dbl> <chr>   <dbl>   <dbl> <chr>   <chr> <chr> <dbl>   <dbl>   <dbl>  <dbl>  <dbl>   <dbl>
+#> 1 All causes Heari… Number 1.20e+6 YLDs  1.71e+6 8.27e+5 United… Male  All …  2019       3     102      1     22     294
+#> 2 All causes Heari… Number 1.03e+6 YLDs  1.42e+6 7.25e+5 United… Fema… All …  2019       3     102      2     22     294
+#> 3 All causes Heari… Number 2.24e+6 YLDs  3.11e+6 1.56e+6 United… Both  All …  2019       3     102      3     22     294
+#> 4 All causes Heari… Perce… 4.22e-2 YLDs  5.55e-2 3.24e-2 United… Male  All …  2019       3     102      1     22     294
+#> 5 All causes Heari… Perce… 3.02e-2 YLDs  3.88e-2 2.36e-2 United… Fema… All …  2019       3     102      2     22     294
+#> # … with 1,387 more rows, 3 more variables: rei_id <dbl>, metric_id <dbl>, measure <chr>, and abbreviated variable
+#> #   names ¹​location, ²​measure_id, ³​location_id, ⁴​cause_id
+#> # ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
+#> If you want to download more data, you can quit and run: gbd_download()
+#> 
+#> Subcategories:
+#> # A tibble: 7 × 9
+#>   cause_id cause_name                                              paren…¹ paren…² level cause…³ sort_…⁴ yll_o…⁵ yld_o…⁶
+#>      <dbl> <chr>                                                     <dbl> <chr>   <dbl> <chr>     <dbl> <chr>   <chr>  
+#> 1      295 Communicable, maternal, neonatal, and nutritional dise…     294 All ca…     1 A             2 NA      NA     
+#> 2      409 Non-communicable diseases                                   294 All ca…     1 B            96 NA      NA     
+#> 3      687 Injuries                                                    294 All ca…     1 C           320 NA      NA     
+#> 4     1029 Total cancers                                               294 All ca…     1 D           361 NA      NA     
+#> 5     1026 Total burden related to hepatitis B                         294 All ca…     1 E           362 NA      NA     
+#> 6     1027 Total burden related to hepatitis C                         294 All ca…     1 F           363 NA      NA     
+#> 7     1028 Total burden related to Non-alcoholic fatty liver dise…     294 All ca…     1 G           364 NA      NA     
+#> # … with abbreviated variable names ¹​parent_id, ²​parent_name, ³​cause_outline, ⁴​sort_order, ⁵​yll_only, ⁶​yld_only
+#>  
+#> Enter row nr of category to browse and hit return: 
+#>   Other options:
+#>   - Hit return without input to pick first row;
+#>   - Enter search term;
+#>   - Enter 'b' to go back;
+#>   - Enter 'q' to quit
+#>   
+#>   2
+#>   
+#> Category:
+#> # A tibble: 1 × 9
+#>   cause_id cause_name                parent_id parent_name level cause_outline sort_order yll_only yld_only
+#>      <dbl> <chr>                         <dbl> <chr>       <dbl> <chr>              <dbl> <chr>    <chr>   
+#> 1      409 Non-communicable diseases       294 All causes      1 B                     96 NA       NA      
+#> 
+#> Data already downloaded for this parent category:
+#>   No data downloaded for this category.
+#> If you want to download more data, you can quit and run: gbd_download()
+#> 
+#> Subcategories:
+#> # A tibble: 12 × 9
+#>    cause_id cause_name                      parent_id parent_name               level cause_ou…¹ sort_…² yll_o…³ yld_o…⁴
+#>       <dbl> <chr>                               <dbl> <chr>                     <dbl> <chr>        <dbl> <chr>   <chr>  
+#>  1      410 Neoplasms                             409 Non-communicable diseases     2 B.1             97 NA      NA     
+#>  2      491 cardiovascular diseases               409 Non-communicable diseases     2 B.2            144 NA      NA     
+#>  3      508 Chronic respiratory diseases          409 Non-communicable diseases     2 B.3            165 NA      NA     
+#>  4      526 Digestive diseases                    409 Non-communicable diseases     2 B.4            175 NA      NA     
+#>  5      542 Neurological disorders                409 Non-communicable diseases     2 B.5            194 NA      NA     
+#>  6      558 Mental disorders                      409 Non-communicable diseases     2 B.6            204 NA      NA     
+#>  7      973 Substance use disorders               409 Non-communicable diseases     2 B.7            219 NA      NA     
+#>  8      974 Diabetes and kidney diseases          409 Non-communicable diseases     2 B.8            227 NA      NA     
+#>  9      653 Skin and subcutaneous diseases        409 Non-communicable diseases     2 B.9            238 NA      NA     
+#> 10      669 Sense organ diseases                  409 Non-communicable diseases     2 B.10           256 NA      X      
+#> 11      626 Musculoskeletal disorders             409 Non-communicable diseases     2 B.11           266 NA      NA     
+#> 12      640 Other non-communicable diseases       409 Non-communicable diseases     2 B.12           277 NA      NA     
+#> # … with abbreviated variable names ¹​cause_outline, ²​sort_order, ³​yll_only, ⁴​yld_only
+#>  
+#> Enter row nr of category to browse and hit return: 
+#>   Other options:
+#>   - Hit return without input to pick first row;
+#>   - Enter search term;
+#>   - Enter 'b' to go back;
+#>   - Enter 'q' to quit
+#>   
+#>   q
+#> 
+#> Returning last category chosen...
+#> [1] "Non-communicable diseases"
+```
+
+And here's a similar browser for risk factors, etiologies, and impairments - called `rei` in GBD-speak:
+
+```{r, eval = FALSE, echo = FALSE}
+# for browsing, enter 2 and then q
+gbd_browse_rei()
+# copy output on clipboard
+capture(cat(clipboard()),collapse="\n#> ")
+# de newlines at user input
+```
+```{r, eval = FALSE}
+gbd_browse_rei()
+#> Category:
+#> 
+#> Data already downloaded for this parent category:
+#> If you want to download more data, you can quit and run: gbd_download()
+#> 
+#> Subcategories:
+#>  Enter row nr of category to browse and hit return: 
+#>   Other options:
+#>   - Hit return without input to pick first row;
+#>   - Enter search term;
+#>   - Enter 'b' to go back;
+#>   - Enter 'q' to quit
+#> Category:
+#> 
+#> Data already downloaded for this parent category:
+#>   No data downloaded for this category.
+#> If you want to download more data, you can quit and run: gbd_download()
+#> 
+#> Subcategories:
+#>  
+#> Enter row nr of category to browse and hit return: 
+#>   Other options:
+#>   - Hit return without input to pick first row;
+#>   - Enter search term;
+#>   - Enter 'b' to go back;
+#>   - Enter 'q' to quitq
+#> 
+#> Returning last category chosen...
+#> [1] "Environmental/occupational risks"
+#> > gbd_browse_rei(gbd)
+#> Category:
+#> # A tibble: 1 × 6
+#>   rei_id rei_name         parent_id parent_name      level sort_order
+#>    <dbl> <chr>                <dbl> <chr>            <dbl>      <dbl>
+#> 1    169 all risk factors       169 all risk factors     0          1
+#> 
+#> Data already downloaded for this parent category:
+#> # A tibble: 753 × 19
+#>   cause       rei   metric     val measure     upper   lower locat…¹ sex   age    year measu…² locat…³ sex_id age_id cause…⁴
+#>   <chr>       <chr> <chr>    <dbl> <chr>   <dbl>   <dbl> <chr>   <chr> <chr> <dbl>   <dbl>   <dbl>  <dbl>  <dbl>   <dbl>
+#> 1 All causes  All … Number 3.50e+7 Deat… 3.69e+7 3.29e+7 Global  Both  All …  2019       1       1      3     22     294
+#> 2 All causes  All … Perce… 6.19e-1 Deat… 6.38e-1 5.98e-1 Global  Both  All …  2019       1       1      3     22     294
+#> 3 All causes  All … Rate   4.52e+2 Deat… 4.77e+2 4.26e+2 Global  Both  All …  2019       1       1      3     22     294
+#> 4 Cardiovasc… All … Number 1.60e+7 Deat… 1.70e+7 1.47e+7 Global  Both  All …  2019       1       1      3     22     491
+#> 5 Cardiovasc… All … Perce… 8.60e-1 Deat… 8.82e-1 8.37e-1 Global  Both  All …  2019       1       1      3     22     491
+#> # … with 748 more rows, 3 more variables: rei_id <dbl>, metric_id <dbl>, measure <chr>, and abbreviated variable names
+#> #   ¹​location, ²​measure_id, ³​location_id, ⁴​cause_id
+#> # ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
+#> If you want to download more data, you can quit and run: gbd_download()
+#> 
+#> Subcategories:
+#> # A tibble: 3 × 6
+#>   rei_id rei_name                         parent_id parent_name      level sort_order
+#>    <dbl> <chr>                                <dbl> <chr>            <dbl>      <dbl>
+#> 1    202 Environmental/occupational risks       169 all risk factors     1          2
+#> 2    203 behavioral risks                       169 all risk factors     1          3
+#> 3    104 Metabolic risks                        169 all risk factors     1          4
+#>  
+#> Enter row nr of category to browse and hit return: 
+#>   Other options:
+#>   - Hit return without input to pick first row;
+#>   - Enter search term;
+#>   - Enter 'b' to go back;
+#>   - Enter 'q' to quit
+#>   
+#>   2
+#>   
+#> Category:
+#> # A tibble: 1 × 6
+#>   rei_id rei_name         parent_id parent_name      level sort_order
+#>    <dbl> <chr>                <dbl> <chr>            <dbl>      <dbl>
+#> 1    203 behavioral risks       169 all risk factors     1          3
+#> 
+#> Data already downloaded for this parent category:
+#> # A tibble: 381 × 19
+#>   cause       rei   metric     val measure     upper   lower locat…¹ sex   age    year measu…² locat…³ sex_id age_id cause…⁴
+#>   <chr>       <chr> <chr>    <dbl> <chr>   <dbl>   <dbl> <chr>   <chr> <chr> <dbl>   <dbl>   <dbl>  <dbl>  <dbl>   <dbl>
+#> 1 All causes  Beha… Number 2.16e+7 Deat… 2.34e+7 2.00e+7 Global  Both  All …  2019       1       1      3     22     294
+#> 2 All causes  Beha… Perce… 3.82e-1 Deat… 4.08e-1 3.61e-1 Global  Both  All …  2019       1       1      3     22     294
+#> 3 All causes  Beha… Rate   2.79e+2 Deat… 3.03e+2 2.59e+2 Global  Both  All …  2019       1       1      3     22     294
+#> 4 Cardiovasc… Beha… Number 9.16e+6 Deat… 1.05e+7 8.06e+6 Global  Both  All …  2019       1       1      3     22     491
+#> 5 Cardiovasc… Beha… Perce… 4.93e-1 Deat… 5.50e-1 4.43e-1 Global  Both  All …  2019       1       1      3     22     491
+#> # … with 376 more rows, 3 more variables: rei_id <dbl>, metric_id <dbl>, measure <chr>, and abbreviated variable names
+#> #   ¹​location, ²​measure_id, ³​location_id, ⁴​cause_id
+#> # ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
+#> If you want to download more data, you can quit and run: gbd_download()
+#> 
+#> Subcategories:
+#> # A tibble: 9 × 6
+#>   rei_id rei_name                            parent_id parent_name      level sort_order
+#>    <dbl> <chr>                                   <dbl> <chr>            <dbl>      <dbl>
+#> 1     92 Child and maternal malnutrition           203 behavioral risks     2         43
+#> 2     98 Tobacco                                   203 behavioral risks     2         57
+#> 3    102 Alcohol use                               203 behavioral risks     2         61
+#> 4    103 Drug use                                  203 behavioral risks     2         62
+#> 5    110 Dietary risks                             203 behavioral risks     2         63
+#> 6    135 Intimate partner violence                 203 behavioral risks     2         78
+#> 7    381 Childhood sexual abuse and bullying       203 behavioral risks     2         79
+#> 8    170 Unsafe sex                                203 behavioral risks     2         82
+#> 9    125 Low physical activity                     203 behavioral risks     2         83
+#>  
+#> Enter row nr of category to browse and hit return: 
+#>   Other options:
+#>   - Hit return without input to pick first row;
+#>   - Enter search term;
+#>   - Enter 'b' to go back;
+#>   - Enter 'q' to quit
+#>   
+#>   q
+#> 
+#> Returning last category chosen...
+#> [1] "behavioral risks"
+```
+
+Once you have found what you want data on, the browsers show you whether you already have data on it.
+If you don't, you have to go download it. `better::gbd_download()` will open the website where you can download it for you. It also opens some other useful pages, as well as your GBD folder, where you'll want to store the data.
+
+```{r, eval = FALSE}
+gbd_download()
+```
+
+Let's take a look at some values:
+
+```{r}
+gbd_filter(cause = "cardiovascular diseases", rei = NA)
+gbd_filter(cause = "cardiovascular diseases", rei = "all risk factors", measure = c("deaths", "DALYs"))
+```
+
+## Playing with the raw data and raw codebook
+
+You don't really need it, but you can play with the raw data and codebook:
+
+```{r}
+gbd
+attr(gbd,"codebook")
+```
+
+You can also read in the raw data, and clean it:
+
+```{r, eval = FALSE}
+gbd_data_raw <- gbd_data_read()
+gbd_data_raw
+gbd_data_clean(gbd_data_raw)
+gbd # same
+```
+
+The same is true for the codebook:
+
+```{r}
+gbd_codebook_raw <- gbd_codebook_read()
+str(gbd_codebook_raw)
+identical(gbd_codebook_clean(gbd_codebook_raw), attr(gbd,"codebook"))
+```
+
+## Effect of nudges
+
+Get the effect size for behavioral interventions aka *nudges* with `better::nudge_to_behavior`. This returns an object of the `better_effect` class. It's basically a list containing the effect size, the confidence interval, and some other metadata. It's printed in a useful way.
+
+```{r}
+eff <- nudge_to_behavior()
+eff
+class(eff)
+str(eff)
+eff$value
+```
+
+Get the full explanation with `better::explanation`.
+
+```{r}
+eff %>%
+  explanation
+```
+
+The estimate above averaged over all categories of behaviors and nudges. Let's now look at the impact for specific categories of behaviors and nudges:
+
+```{r}
+nudge_to_behavior(behavior = "health")
+nudge_to_behavior(behavior = "food")
+nudge_to_behavior(nudge = "assistance")
+nudge_to_behavior(nudge = "structure")
+nudge_to_behavior(behavior = "food", nudge = "structure")
+nudge_to_behavior(behavior = "health", nudge = "information")
+```
+
+You can also access the dataset of Cohen's *d*'s.
+
+```{r}
+nudge_data()
+```
+
+Proportions
+
+```{r}
+nudge_to_behavior(behavior = "health", nudge = "information") %>%
+  print %>%
+  behavior_cd_to_pp(cause = "cardiovascular diseases") 
+nudge_to_behavior(behavior = "health", nudge = "information") %>%
+  behavior_cd_to_pp(cause = "cardiovascular diseases") %>% 
+  explanation
+```
+
+The estimates of the proportions are based on the GBD data on summary exposure values, which you can access like this:
+
+```{r}
+gbd_filter(measure = "summary exposure value")
+```
+
+
+
+```{r}
+# nudge_to_behavior("information") %>% print %>%
+#   behavior_cd_to_pp %>% print %>%
+#   behavior_to_disease("cardiovascular disease")
+# 
+# nudge("information") %>%
+#   disease("cardiovascular disease") %>%
+#   explanation
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

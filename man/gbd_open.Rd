@@ -2,12 +2,12 @@
 % Please edit documentation in R/gbd_clean.R
 \name{gbd_open}
 \alias{gbd_open}
-\title{Open the folder with the GBD data.}
+\title{Open the folder with the Global Burden of Disease data.}
 \usage{
-gbd_open(path = getOption("better.gbd_path"))
+gbd_open(path)
 }
 \arguments{
-\item{path}{Path of the parentfolder of the GBD data.}
+\item{path}{Path of the GBD folder, where the data are stored. By default, automatically read from options, namely, \code{better.gbd_path}, ideally set in .Rprofile. To learn more, call \verb{vignette(\\"better\\")}.}
 }
 \value{
 The value of \code{base::system2("open", path)}, which this function wraps.
@@ -16,10 +16,15 @@ The value of \code{base::system2("open", path)}, which this function wraps.
 Wrapper around \code{system2("open", path)}.
 }
 \examples{
-GBD_PATH <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd_open(GBD_PATH) # better set default path in options (see ?gbd_read)
+\dontshow{
+options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+}
+\dontrun{
+# If you haven't already:
+# Add the following to your .Rprofile (and restart):
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
+# See `vignette(\"better\")`
+
+gbd_open()
+}
 }
