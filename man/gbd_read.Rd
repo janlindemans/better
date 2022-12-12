@@ -2,42 +2,32 @@
 % Please edit documentation in R/gbd_clean.R
 \name{gbd_read}
 \alias{gbd_read}
-\title{Read Global Burden of Disease data}
+\title{Read cleaned Global Burden of Disease data}
 \usage{
-gbd_read(path = as.character(getOption("better.gbd_path")))
+gbd_read(path, load = FALSE, assign_to)
 }
 \arguments{
-\item{path}{Path of the parentfolder of the data.}
+\item{path}{Path of the GBD folder, where the data are stored. By default, automatically read from options, namely, \code{better.gbd_path}, ideally set in .Rprofile. To learn more, call \verb{vignette(\\"better\\")}.}
+
+\item{load}{Whether or not to automatically assign the returned value to the global variable \code{gbd}. The default is \code{load = FALSE}. Rather than \code{gbd_save(load = TRUE)}, consider the cleaner alternative \code{gbd <- gbd_save()}.}
+
+\item{assign_to}{What variable name to assign the GBD dataset to.}
 }
 \value{
-Dataframe containing the GBD data.
+The value of \code{base::readRDS}, which this function wraps.
 }
 \description{
-Read the GBD data from your local folder. It looks for data files in all subfolders of the GBD folder and merges them into one dataframe.
+Calls \code{base::readRDS} on the \code{.rds} file with the cleaned GBD data.
 }
 \examples{
-# Folder where you saved your GBD data:
-GBD_PATH <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd <- gbd_read(GBD_PATH)
-gbd
-
-# Better set the default path in `options`,
-# so you don't need to specify paths anymore:
-options(better.gbd_path = GBD_PATH)
+\dontshow{
+options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+}
+\dontrun{
+# If you haven't already:
+# Add the following to your .Rprofile (and restart):
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
+# See `vignette(\"better\")`
+}
 gbd <- gbd_read()
-# Even better: specify the GBD path option in your .Rprofile file,
-# so the path will be available accross sessions.
-
-gbd_meta <- gbd_codebook_read()
-gbd_meta
-gbd_meta <- gbd_codebook_clean(gbd_meta)
-gbd_meta
-attach(gbd_meta)
-gbd_cb
-gbd_cb_cause
-
 }

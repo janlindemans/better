@@ -4,10 +4,10 @@
 \alias{gbd_codebook_read}
 \title{Read Global Burden of Disease codebook}
 \usage{
-gbd_codebook_read(path = getOption("better.gbd_path"))
+gbd_codebook_read(path)
 }
 \arguments{
-\item{path}{Path of the parentfolder of the codebooks.}
+\item{path}{Path of the GBD folder, where the data are stored. By default, automatically read from options, namely, \code{better.gbd_path}, ideally set in .Rprofile. To learn more, call \verb{vignette(\\"better\\")}.}
 }
 \value{
 List with dataframes of GBD codebooks.
@@ -16,18 +16,16 @@ List with dataframes of GBD codebooks.
 Read the GBD codebook from your local folder. It looks for codebook files in all subfolders of the GBD folder and puts them into a list.
 }
 \examples{
-# Folder where you saved your GBD codebook:
-GBD_PATH <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd_meta <- gbd_codebook_read(GBD_PATH)
+\dontshow{
+options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+}
+\dontrun{
+# If you haven't already:
+# Add the following to your .Rprofile (and restart):
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
+# See `vignette(\"better\")`
+}
 
-# Better set the default path in `options`,
-# so you don't need to specify paths anymore:
-options(better.gbd_path = GBD_PATH)
-gbd <- gbd_codebook_read()
-# Even better: specify the GBD path option in your .Rprofile file,
-# so the path will be available accross sessions.
+gbd_codebook <- gbd_codebook_read()
+gbd_codebook
 }

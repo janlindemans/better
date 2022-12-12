@@ -4,7 +4,7 @@
 \alias{gbd_codebook_clean}
 \title{Clean Global Burden of Disease codebook}
 \usage{
-gbd_codebook_clean(x)
+gbd_codebook_clean(x = gbd_codebook_read())
 }
 \arguments{
 \item{x}{List with codebooks to be cleaned.}
@@ -16,11 +16,18 @@ List with cleaned codebooks.
 Clean Global Burden of Disease codebook
 }
 \examples{
-GBD_PATH <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd_meta <- gbd_codebook_read(GBD_PATH) # better set default path in options (see ?gbd_read)
-gbd_codebook_clean(gbd_meta)
+\dontshow{
+options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+}
+\dontrun{
+# If you haven't already:
+# Add the following to your .Rprofile (and restart):
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
+# See `vignette(\"better\")`
+}
+
+library(tidyverse)
+
+gbd_codebook <- gbd_codebook_read() \%>\%
+  gbd_codebook_clean
 }

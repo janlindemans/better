@@ -2,24 +2,31 @@
 % Please edit documentation in R/gbd_clean.R
 \name{gbd_load}
 \alias{gbd_load}
-\title{Load saved Global Burden of Disease data and codebook}
+\title{Load cleaned Global Burden of Disease data}
 \usage{
-gbd_load(path = getOption("better.gbd_path"))
+gbd_load(path, assign_to = "gbd")
 }
 \arguments{
-\item{path}{Path of the folder of the .RData file.}
+\item{path}{Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.}
+
+\item{assign_to}{What variable name to assign the GBD dataset to.}
 }
 \value{
-The value of \code{base::load}, which this function wraps.
+The value of \code{base::readRDS}, which this function wraps.
 }
 \description{
-Load saved Global Burden of Disease data and codebook
+Load cleaned Global Burden of Disease data
 }
 \examples{
-GBD_PATH <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd_load(GBD_PATH) # better set default path in options (see ?gbd_read)
+\dontshow{
+options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+}
+\dontrun{
+# If you haven't already:
+# Add the following to your .Rprofile (and restart):
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
+# See `vignette(\"better\")`
+}
+
+gbd_load()
 }

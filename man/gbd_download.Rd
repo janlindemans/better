@@ -4,10 +4,10 @@
 \alias{gbd_download}
 \title{Download Global Burden of Disease data}
 \usage{
-gbd_download(path = getOption("better.gbd_path"))
+gbd_download(path)
 }
 \arguments{
-\item{path}{Path of the parentfolder of the GBD data.}
+\item{path}{Path of the GBD folder, where the data are stored. By default, automatically read from options, namely, \code{better.gbd_path}, ideally set in .Rprofile. To learn more, call \verb{vignette(\\"better\\")}.}
 }
 \value{
 URLs of webpages opened, invisible.
@@ -16,10 +16,15 @@ URLs of webpages opened, invisible.
 Download Global Burden of Disease data
 }
 \examples{
-GBD_PATH <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd_download(GBD_PATH) # better set default path in options (see ?gbd_read)
+\dontshow{
+options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+}
+\dontrun{
+# If you haven't already:
+# Add the following to your .Rprofile (and restart):
+options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
+# See `vignette(\"better\")`
+}
+
+# gbd_download()
 }
