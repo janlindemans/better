@@ -1,7 +1,6 @@
 # TODO:
 # automatic gbd_save if no rds file found (in gbd_read)
 # default rds file with package - needs agreement. Also loads if no data found on given path
-
 # Figure out risk behaviors: sometimes POSITIVE impact on health. Code for that!
 
 
