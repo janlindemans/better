@@ -162,55 +162,8 @@ nudge_to_behavior(nudge = "information", behavior = "health") %>%
 
 What if we tried a structural nudge?
 
-
-
-This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior(nudge = "information", behavior = "health")$value`.
-
-Second, as an intermediate step, we translate Cohen's *d* into a percentage point difference.
-
-```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp
-```
-
-This gives us a decrease of `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% {round(abs(.$value),1)}` percentage points.
-
-Finally, we can get our guestimate of the effect:
-
-```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("cardiovascular diseases")
-```
-
-```{r}
-gbd_cb <- gbd_codebook()
-nudge_cb <- nudge_codebook()
-nudge_cb$nudge
-nudge_cb$behavior
-```
-
-We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% behavior_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
-
-Note that this is based on the following statistic:
-
-```{r}
-gbd_describe(cause = "cardiovascular diseases")
-```
-
-Let's see, what if we would shift the focus of our intervention to diabetes and kidney diseases?
-
-```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("diabetes and kidney diseases")
-```
-
-What if we tried a structural nudge?
-
 ```{r}
 nudge_to_behavior(nudge = "structure", behavior = "health") %>%
   behavior_cd_to_pp %>%
   behavior_to_disease("diabetes and kidney diseases")
 ```
-

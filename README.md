@@ -113,35 +113,6 @@ You’ll do the same for future data downloads. Just don’t change the
 names of the data files, and codebook files for that matter, because
 `better` searches for them using these names.
 
-- `Measure`: Select `YLLs`, `Prevalence`, and `Incidence`.
-
-After you did that, go back and download a dataset on *risk factors*:
-
-- `GBD Estimate`: Select `Risk factor`.
-- `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs`.
-- `Metric`: Fine as is, keep all three.
-- `Risk`: Keep `All risk factors`, add `behavioral risks`, `Tobacco` and
-  `Dietary risks`.
-- `Cause` until `Year`: Keep it all as is, if it remembered your
-  selections from the dataset on causes of death (see above).
-
-After you did that, go back, and download the same dataset but with
-`Measure` being `YLLs`.
-
-After you did that, go back and download a dataset on *summary exposure
-values*: \* `GBD Estimate`: Select `Summary exposure values (SEV)`. \*
-For `Measure` and `Metric`, you won’t have any choice. \* `Risk` until
-`Year`: Keep it all as is, if it remembered your selections from earlier
-on (see above).
-
-After unzipping, the downloaded data folder should have a name similar
-to this: `IHME-GBD_2019_DATA-64c5a7b3-1`. Store this data folder
-anywhere in (a subfolder of) your GBD folder. For instance:
-`Users/johnwilliam/datasets/Global Burden of Disease/Raw GBD data/IHME-GBD_2019_DATA-64c5a7b3-1`.
-You’ll do the same for future data downloads. Just don’t change the
-names of the data files, and codebook files for that matter, because
-`better` searches for them using these names.
-
 ### Set global option in your `.Rprofile` file
 
 Enter the path of your GBD folder (e.g.,
@@ -192,7 +163,6 @@ library(tidyverse)
 library(better)
 #> Welcome to the better package!
 #> To learn more, read the vignette by calling `vignette("better")`.
-#> To learn more, read the vignette by calling `vignette("gbd")`.
 nudge_to_behavior(nudge = "information", behavior = "health") 
 #> Looking up data on nudges...
 #> Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
@@ -377,13 +347,6 @@ nudge_to_behavior(nudge = "information", behavior = "health") %>%
   behavior_to_disease("diabetes and kidney diseases")
 #> Looking up data on cause of disease/disability...
 #> Getting data from object `gbd`.
-
-Second, as an intermediate step, we translate Cohen’s *d* into a
-percentage point difference.
-
-``` r
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp
 #> Looking up data on nudges...
 #> Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
 #> 
@@ -393,19 +356,6 @@ nudge_to_behavior(nudge = "information", behavior = "health") %>%
 #> 
 #> Call:   behavior_to_disease(., "diabetes and kidney diseases"), with default arguments:
 #>   measure = DALYs, metric = rate
-#> Object `gbd` not found. Loading GBD data and assigning it to `gbd`.
-#> Getting path from `getOption("better.gbd_path")`.
-#>   Path found:
-#> /Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My Drive/Offline Drive/R - Offline Drive/R packages JW/better/ignore/Global Burden of Disease Study Data
-#> You provided the GBD path explicitly in the `path` argument. Consider adding `options(better.gbd_path = "path/to/gbd/data")` to your .Rprofile, and make use of the default path. See `vignette("better")`.
-#> Reading GBD data with codebook:
-#>   /Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My
-#> Drive/Offline Drive/R - Offline Drive/R packages JW/better/ignore/Global Burden
-#> of Disease Study Data/gbd.rds
-#> Loaded GBD data with codebook, assigned to global variable `gbd`, and invisibly returning it.
-#> 
-#> 
-#> Call:   behavior_cd_to_pp(.)
 #> Param.: rei = behavioral risks, location = Global, behavior = health, nudge =
 #>   information
 #> 
@@ -427,99 +377,10 @@ nudge_to_behavior(nudge = "information", behavior = "health") %>%
 #> ...ombine both
 #> confidence intervals. That gives us the estimate that the nudge saves 251.5
 #> DALYs per 100,000 people, 95% CI [69.5, 505.5].
-#> percentage point decrease in exposure to behavioral risks in percentage points:
-#> 
-#> 9.37, 95% CI [3.24, 15.49]
-#> 
-#>   Explanation:
-#> 
-#> We estimate that the percentage point decrease in behavioral risks exposure is
-#> 9.37 percentage points, 95% CI [3.24, 15.49].
-#> 
-#> Note that, if the estimate has a minus sign, it indicates an increase in
-#> behavioral risks. We derive this from the Cohen's d for behavior category
-#> "health" and nudge category...
-#>   [truncated - call `explanation(*)` for full explanation]
-#> ...ind it equals
-#> sqrt(p*(1-p)). Since we have two groups - a control group and a nudged group -
-#> you can also calculate Cohen's d as usual.
 #> 
 #> Source: Institute for Health Metrics and Evaluation. Used with permission.
 #> All rights reserved. For details, including how to cite the source, call
 #> `gbd_license()`.
-```
-
-This gives us a decrease of 9.4 percentage points.
-
-Finally, we can get our guestimate of the effect:
-
-``` r
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("cardiovascular diseases")
-#> Looking up data on cause of disease/disability...
-#> Getting data from object `gbd`.
-#> Looking up data on nudges...
-#> Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
-#> 
-#> Translating Cohen's d into percentage point difference. Looking up data on summary exposure value...
-#> Getting data from object `gbd`.
-```
-
-``` r
-gbd_cb <- gbd_codebook()
-#> Getting data from object `gbd`.
-nudge_cb <- nudge_codebook()
-#> Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
-nudge_cb$nudge
-#> # A tibble: 3 × 2
-#>   nudge       explain                                                           
-#>   <chr>       <chr>                                                             
-#> 1 information intervention that focuses on the description of alternatives (dec…
-#> 2 structure   intervention that targets the organization and structure of choic…
-#> 3 assistance  intervention that reinforces behavioral intentions (decision assi…
-nudge_cb$behavior
-#> # A tibble: 6 × 1
-#>   behavior   
-#>   <chr>      
-#> 1 health     
-#> 2 food       
-#> 3 environment
-#> 4 finance    
-#> 5 pro-social 
-#> 6 other
-```
-
-We learned something! If we’re going to roll out an information nudge in
-100,000 people, targeted at cardiovascular diseases, we’re expected to
-boost disability adjusted life years by about 1630 years! That’s not
-bad.
-
-Note that this is based on the following statistic:
-
-``` r
-gbd_describe(cause = "cardiovascular diseases")
-#> Getting data from object `gbd`.
-#> Getting data from object `gbd`.
-#> In 2019, globally, the estimated cost of cardiovascular diseases, for both
-#> men and women of all ages, was 5,081 DALYs per 100,000 people, 95% CI [4,753,
-#> 5,393]. Note that DALYs refers to disability adjusted life years.
-```
-
-Let’s see, what if we would shift the focus of our intervention to
-diabetes and kidney diseases?
-
-``` r
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("diabetes and kidney diseases")
-#> Looking up data on cause of disease/disability...
-#> Getting data from object `gbd`.
-#> Looking up data on nudges...
-#> Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
-#> 
-#> Translating Cohen's d into percentage point difference. Looking up data on summary exposure value...
-#> Getting data from object `gbd`.
 ```
 
 What if we tried a structural nudge?
