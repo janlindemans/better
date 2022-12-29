@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-IMPORTANT: THIS PACKAGE IS STILL UNDER DEVELOPMENT. IT IS NOT YET INTENDED FOR USE. IT'S HERE FOR DEVELOPMENT PURPOSES ONLY.
+IMPORTANT: THIS PACKAGE IS STILL UNDER DEVELOPMENT. IT'S NOT YET INTENDED FOR USE. IT'S HERE FOR DEVELOPMENT PURPOSES ONLY.
 
 The goal of better is to make the world a better place through impact evaluation.
 
@@ -114,27 +114,27 @@ First, we look up the effect of an information nudge on health behavior.
 ```{r}
 library(tidyverse)
 library(better)
-nudge_to_behavior(nudge = "information", behavior = "health") 
+nudge_to_behavior_d(nudge = "information", behavior = "health") 
 ```
 
 
-This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior(nudge = "information", behavior = "health")$value`.
+This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior_d(nudge = "information", behavior = "health")$value`.
 
 Second, as an intermediate step, we translate Cohen's *d* into a percentage point difference.
 
 ```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  behavior_d_to_pct
 ```
 
-This gives us a decrease of `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% {round(abs(.$value),1)}` percentage points.
+This gives us a decrease of `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% {round(abs(.$value),1)}` percentage points.
 
 Finally, we can get our guestimate of the effect:
 
 ```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("cardiovascular diseases")
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  behavior_d_to_pct %>%
+  behavior_pct_to_disease("cardiovascular diseases")
 ```
 
 ```{r}
@@ -144,7 +144,7 @@ nudge_cb$nudge
 nudge_cb$behavior
 ```
 
-We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% behavior_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
+We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% behavior_pct_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
 
 Note that this is based on the following statistic:
 
@@ -155,15 +155,15 @@ gbd_describe(cause = "cardiovascular diseases")
 Let's see, what if we would shift the focus of our intervention to diabetes and kidney diseases?
 
 ```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("diabetes and kidney diseases")
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  behavior_d_to_pct %>%
+  behavior_pct_to_disease("diabetes and kidney diseases")
 ```
 
 What if we tried a structural nudge?
 
 ```{r}
-nudge_to_behavior(nudge = "structure", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("diabetes and kidney diseases")
+nudge_to_behavior_d(nudge = "structure", behavior = "health") %>%
+  behavior_d_to_pct %>%
+  behavior_pct_to_disease("diabetes and kidney diseases")
 ```

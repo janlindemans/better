@@ -34,7 +34,7 @@ library(tidyverse)
 
 gbd <- gbd_read()
 
-nudge_to_behavior() \%>\%
-  behavior_cd_to_pp \%>\%
+nudge_to_behavior_d() \%>\%
+  behavior_d_to_pct \%>\%
   explanation
 }

@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This package helps you to better guestimate the effect of health nudges, that is, of behavioral interventions targeted at health behaviors. And make the world a *better* place! 
+This package helps you to better guesstimate the effect of health nudges, that is, of behavioral interventions targeted at health behaviors. And make the world a *better* place! 
 
 ## Set up
 
@@ -84,50 +84,145 @@ After unzipping, the downloaded data folder should have a name similar to this: 
 
 ### Set global option in your `.Rprofile` file
 
-Enter the path of your GBD folder (e.g., `Users/johnwilliam/datasets/Global Burden of Disease`) as the default GBD path via global options set in your `.Rprofile` file. It will be used by several `better` functions. It is not required, since you can also set global options manually in each session, or even set the path manually for each function call (see below). But it's easier to take care of this once and for all in `.Rprofile`. 
+Enter the path of your GBD folder (e.g., `Users/yourname/datasets/Global Burden of Disease`) as the default GBD path via global options set in your `.Rprofile` file. It will be used by several `better` functions. It is not required, since you can also set global options manually in each session, or even set the path manually for each function call (see below). But it's easier to take care of this once and for all in `.Rprofile`. 
 
 It will look like this:
 
 ```{r, eval = FALSE}
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease")
+options(better.gbd_path = "/Users/yourname/datasets/Global Burden of Disease")
 ```
 
-If you haven't used `.Rprofile` before, it's a hidden file with code R runs at startup. It's located somewhere somewhere similar to this: `Users/johnwilliam/.Rprofile`. Learn more about `.Rprofile` on [the Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
+If you haven't used `.Rprofile` before, it's a hidden file with code that R runs at startup. It should be located in your home/user folder (e.g., `Users/yourname/.Rprofile`). Learn more about `.Rprofile` on the [Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
 
 ## Quick intro to effects
 
-The main purpose of `better` is to help you better guestimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. 
+```{r, echo = FALSE}
+library(better)
+library(tidyverse)
+# So that the once-per-session messages are gone:
+nudge("information") %>% 
+  disease("cardiovascular diseases")
+```
 
-Imagine you are designing a public health campaign. You are thinking about focusing on preventing cardiovascular diseases, and you are considering making information about healthy lifestyle more accessible. What effects can you expect from a campaign like that? This is how we would do it with `better`.
+The main purpose of `better` is to help you better guesstimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. 
+
+Imagine you are designing a public health campaign. You are thinking about focusing on preventing cardiovascular diseases, and you are considering making information about healthy lifestyle more accessible. What effects can you expect from a campaign like that? 
+
+This is how we would make a guesstimate with `better`. Let's load it, and let's also load `tidyverse`, so we can use pipes and other tidy constructions.
+
+```{r}
+library(better)
+library(tidyverse)
+```
+
+Then, we tell `better::nudge` what kind of nudge we are envisioning: in our case `"information"`. We pipe the result into `better::disease` and tell it what disease we are targeting: `"cardiovascular diseases"`.
+
+```{r}
+nudge("information") %>% 
+  disease("cardiovascular diseases")
+```
+
+You get some rich output, but the main thing is the number below "Value": `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)}`. What does it mean? If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)}` years. Note that disability adjusted life years (DALYs) refers to healthy life years - life years without disease or disability.
+
+We can get the full explanation of the guesstimate with `better::explanation`:
+
+```{r}
+nudge("information") %>% 
+  disease("cardiovascular diseases") %>%
+  explanation
+```
+
+Let's see what happens if we would shift the focus of our intervention to diabetes and kidney diseases. To simplify the output, I use `better::effect_only`. It prints only the effect, leaving out the parameters and explanation.
+
+```{r}
+nudge("information") %>%
+  disease("diabetes and kidney diseases") %>%
+  effect_only
+```
+
+What if we tried a structural nudge?
+
+```{r}
+nudge("structure") %>%
+  disease("diabetes and kidney diseases") %>%
+  effect_only
+```
+
+What if we wanted to see the impact on deaths?
+
+```{r}
+nudge("structure") %>%
+  disease("diabetes and kidney diseases", measure = "deaths") %>%
+  effect_only
+```
+
+## Input your own effect size
+
+Imagine you are still designing that public health campaign, on preventing cardiovascular diseases. But suppose you know the effect of your intervention on behavior (or you know the effect you want, etc.). More specifically, you have a Cohen's *d*. Then, `better::behavior_d` allows you to create an effect out of that, in the following way:
+
+```{r}
+behavior_d(.56) %>%
+  disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+You can also enter a percentage difference (decrease in the risky behavior) with `better::behavior_pct`. Say you know it decreases risky behavior by 11.4%:
+
+```{r}
+behavior_pct(11.4) %>%
+  disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+Entering a percentage difference is probably not so useful. The main reason is that inputting a percentage difference makes less assumptions than inputting a Cohen's *d*. We can see why when we split up the calculation in it's steps.
+
+If you start from Cohen's *d*, the calculation is in three steps, because Cohen's *d* needs to be translated in a percentage difference:
+
+```{r}
+behavior_d(.56) %>%
+  behavior_d_to_pct %>%
+  behavior_pct_to_disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+In contrast, if you start from a percentage difference, it's only two steps: 
+
+```{r}
+behavior_pct(11.4) %>%
+  behavior_pct_to_disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+## Breaking things up
+
+Here is the full reasoning:
 
 First, we look up the effect of an information nudge on health behavior.
 
 ```{r}
-library(tidyverse)
-library(better)
-nudge_to_behavior(nudge = "information", behavior = "health") 
+nudge_to_behavior_d(nudge = "information", behavior = "health")
 ```
 
-This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior(nudge = "information", behavior = "health")$value`.
+This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior_d(nudge = "information", behavior = "health")$value`.
 
-Second, as an intermediate step, we translate Cohen's *d* into a percentage point difference.
+Second, as an intermediate step, we translate Cohen's *d* into a percentage difference, because that's how we can link it to the Global Burden of Disease dataset.
 
 ```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  behavior_d_to_pct
 ```
 
-This gives us a decrease of `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% {round(abs(.$value),1)}` percentage points.
+This gives us a decrease of `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% {round(abs(.$value),1)}` percentage points.
 
-Finally, we can get our guestimate of the effect:
+Finally, we can get our guesstimate of the effect:
 
 ```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("cardiovascular diseases")
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  behavior_d_to_pct %>%
+  behavior_pct_to_disease("cardiovascular diseases")
 ```
 
-We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior(nudge = "information", behavior = "health") %>% behavior_cd_to_pp %>% behavior_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
+We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% behavior_pct_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
 
 Note that this is based on the following statistic:
 
@@ -135,21 +230,6 @@ Note that this is based on the following statistic:
 gbd_describe(cause = "cardiovascular diseases")
 ```
 
-Let's see, what if we would shift the focus of our intervention to diabetes and kidney diseases?
-
-```{r}
-nudge_to_behavior(nudge = "information", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("diabetes and kidney diseases")
-```
-
-What if we tried a structural nudge?
-
-```{r}
-nudge_to_behavior(nudge = "structure", behavior = "health") %>%
-  behavior_cd_to_pp %>%
-  behavior_to_disease("diabetes and kidney diseases")
-```
 
 To organize:
 
@@ -589,10 +669,10 @@ identical(gbd_codebook_clean(gbd_codebook_raw), attr(gbd,"codebook"))
 
 ## Effect of nudges
 
-Get the effect size for behavioral interventions aka *nudges* with `better::nudge_to_behavior`. This returns an object of the `better_effect` class. It's basically a list containing the effect size, the confidence interval, and some other metadata. It's printed in a useful way.
+Get the effect size for behavioral interventions aka *nudges* with `better::nudge_to_behavior_d`. This returns an object of the `better_effect` class. It's basically a list containing the effect size, the confidence interval, and some other metadata. It's printed in a useful way.
 
 ```{r}
-eff <- nudge_to_behavior()
+eff <- nudge_to_behavior_d()
 eff
 class(eff)
 str(eff)
@@ -609,12 +689,12 @@ eff %>%
 The estimate above averaged over all categories of behaviors and nudges. Let's now look at the impact for specific categories of behaviors and nudges:
 
 ```{r}
-nudge_to_behavior(behavior = "health")
-nudge_to_behavior(behavior = "food")
-nudge_to_behavior(nudge = "assistance")
-nudge_to_behavior(nudge = "structure")
-nudge_to_behavior(behavior = "food", nudge = "structure")
-nudge_to_behavior(behavior = "health", nudge = "information")
+nudge_to_behavior_d(behavior = "health")
+nudge_to_behavior_d(behavior = "food")
+nudge_to_behavior_d(nudge = "assistance")
+nudge_to_behavior_d(nudge = "structure")
+nudge_to_behavior_d(behavior = "food", nudge = "structure")
+nudge_to_behavior_d(behavior = "health", nudge = "information")
 ```
 
 You can also access the dataset of Cohen's *d*'s.
@@ -626,11 +706,11 @@ nudge_data()
 Proportions
 
 ```{r}
-nudge_to_behavior(behavior = "health", nudge = "information") %>%
+nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
   print %>%
-  behavior_cd_to_pp(cause = "cardiovascular diseases") 
-nudge_to_behavior(behavior = "health", nudge = "information") %>%
-  behavior_cd_to_pp(cause = "cardiovascular diseases") %>% 
+  behavior_d_to_pct(cause = "cardiovascular diseases") 
+nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+  behavior_d_to_pct(cause = "cardiovascular diseases") %>% 
   explanation
 ```
 
@@ -643,9 +723,9 @@ gbd_filter(measure = "summary exposure value")
 
 
 ```{r}
-# nudge_to_behavior("information") %>% print %>%
-#   behavior_cd_to_pp %>% print %>%
-#   behavior_to_disease("cardiovascular disease")
+# nudge_to_behavior_d("information") %>% print %>%
+#   behavior_d_to_pct %>% print %>%
+#   behavior_pct_to_disease("cardiovascular disease")
 # 
 # nudge("information") %>%
 #   disease("cardiovascular disease") %>%

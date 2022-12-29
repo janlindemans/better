@@ -81,11 +81,12 @@ gbd_license <- function(full = TRUE) {
 # TODO: Once I have a beta version: Ask for permission to use a local dataset.
 
 pretty_nr <- function(..., always_vector = FALSE) {
+  x_syms <- rlang::enexprs(...)
   #browser()
   x <- unlist(list(...))
-  if (any(x < 10)) {
+  if (any(x[!is.na(x)] < 10)) {
     nsmall <- 2
-  } else if (any(x < 100)) {
+  } else if (any(x[!is.na(x)] < 100)) {
     nsmall <- 1
   } else {
     nsmall <- 0
@@ -93,7 +94,12 @@ pretty_nr <- function(..., always_vector = FALSE) {
   y <- format(x, trim = TRUE, scientific = FALSE, big.mark = ",", digits = 2, nsmall = nsmall)
   names(y) <- names(x)
   #browser()
-  if (!is.null(names(y)) & !always_vector) {
+  if (!length(x) == 1 & !all(purrr::map_lgl(x_syms,is.numeric)) & !always_vector) {
+    #browser()
+    if (is.null(names(x)) & !all(purrr::map_lgl(x_syms,is.call))) {
+      #browser()
+      names(y) <- purrr::map_chr(x_syms,rlang::as_string)
+    }
     y <- as.list(y)
   }
   return(y)
@@ -101,18 +107,21 @@ pretty_nr <- function(..., always_vector = FALSE) {
 
 get_path <- function(path, path_missing = FALSE) {
   #browser()
-  path_str <- rlang::as_string(rlang::ensym(path))
+  #path_str <- rlang::as_string(rlang::ensym(path))
 
   if (path_missing) {
-    message("Getting path from `getOption(\"better.gbd_path\")`.")
+    rlang::inform("Getting path from `getOption(\"better.gbd_path\")`.", .frequency = "once", .frequency_id = "Getting path from `getOption(\"better.gbd_path\")`.")
     y <- getOption("better.gbd_path")
     if (length(y) == 0) {
       stop("No path found with `getOption(\"better.gbd_path\")`. Did you forget to add `options(better.gbd_path = \"path/to/gbd/data\")` to your .Rprofile? See `vignette(\"better\")`.")
     } else {
-      message("  Path found:\n",y)
+      rlang::inform(paste0("  Path found:\n",stringr::str_wrap(y, exdent = 2)), .frequency = "once", .frequency_id = "Path found")
     }
   } else {
-    message("You provided the GBD path explicitly in the `path` argument. Consider adding `options(better.gbd_path = \"path/to/gbd/data\")` to your .Rprofile, and make use of the default path. See `vignette(\"better\")`.")
+    rlang::inform(
+      "You provided the GBD path explicitly in the `path` argument. Consider adding `options(better.gbd_path = \"path/to/gbd/data\")` to your .Rprofile, and make use of the default path. See `vignette(\"better\")`.",
+      .frequency = "once", .frequency_id = "You provided the GBD path explicitly in the `path` argument"
+    )
     y <- path
   }
   y <- as.character(y)
@@ -120,8 +129,6 @@ get_path <- function(path, path_missing = FALSE) {
   if (!file.exists(y)) {
     stop("The path doesn't exist:\n  ",y,ifelse(path_missing,"","\nYou probably want to edit `options(better.gbd_path = \"correct/path/to/gbd/data\")` in your .Rprofile."))
   }
-
-
 
   return(y)
 }#; get_path("/user/some/kind/path/bla", path_missing = FALSE)
@@ -519,7 +526,7 @@ gbd_save <- function(path) {
 #' gbd <- gbd_read()
 gbd_read <- function(path, load = FALSE, assign_to) {
   path <- get_path(path, missing(path))
-  message("Reading GBD data with codebook:\n  ",stringr::str_wrap(gbd_rds_path(path)))
+  rlang::inform(paste0("Reading GBD data with codebook:\n  ",stringr::str_wrap(gbd_rds_path(path))), .frequency = "once", .frequency_id = "Reading GBD data with codebook")
   y <- readRDS(gbd_rds_path(path))
   if (load) {
     assign(assign_to, y, envir=globalenv()) # this generates a note in devtools::check(), but it's fine
@@ -532,7 +539,7 @@ gbd_read <- function(path, load = FALSE, assign_to) {
 
 #' Load cleaned Global Burden of Disease data
 #'
-#' @param path `r txt$gbd_cite`
+#' @param ... Passed on to `gbd_read`.
 #' @param assign_to What variable name to assign the GBD dataset to.
 #'
 #' @return The value of `base::readRDS`, which this function wraps.
@@ -550,9 +557,9 @@ gbd_read <- function(path, load = FALSE, assign_to) {
 #' }
 #'
 #' gbd_load()
-gbd_load <- function(path, assign_to = "gbd") {
-  path <- get_path(path, missing(path))
-  gbd_read(path = path, load = TRUE, assign_to = assign_to)
+gbd_load <- function(..., assign_to = "gbd") {
+  #path <- get_path(path, missing(path))
+  gbd_read(..., load = TRUE, assign_to = assign_to)
 }
 
 #' Download Global Burden of Disease data
@@ -632,13 +639,21 @@ get_gbd <- function(data, data_missing) {
 
   data_str <- rlang::as_string(rlang::ensym(data))
   if (data_missing) {
-    message("Getting data from object `gbd`.")
+    rlang::inform(
+      "Getting data from object `gbd`.",
+      .frequency = "once",
+      .frequency_id = "Getting data from object `gbd`."
+    )
     if (exists("gbd", envir = rlang::caller_env())) {
       y <- get("gbd", envir = rlang::caller_env())
       #message("Got data from object named `gbd`.")
     } else {
       #stop("get gbd nrow gbd", get("gbd"))
-      message("Object `gbd` not found. Loading GBD data and assigning it to `gbd`.")
+      rlang::inform(
+        "Object `gbd` not found. Loading GBD data and assigning it to `gbd`.",
+        .frequency = "once",
+        .frequency_id = "Object `gbd` not found. Loading GBD data and assigning it to `gbd`."
+      )
       y <- gbd_load()
       #stop("Object `gbd` not found. Did you forget to `gbd_load()`? To learn more, call `vignette(\"better\")`.")
     }
@@ -1274,8 +1289,8 @@ new_effect <- function(
   params = list()
 ) {
   stopifnot(is.numeric(value))
-  stopifnot(is.numeric(lower))
-  stopifnot(is.numeric(upper))
+  stopifnot(is.na(lower) | is.numeric(lower))
+  stopifnot(is.na(upper) | is.numeric(upper))
   y <- list(
     value = value,
     lower = lower,
@@ -1304,52 +1319,87 @@ pretty_value <- function(val, low, high, unit = "", sep = " ", spec = ", 95% CI"
     low <- 100*low
     high <- 100*high
   }
-  nrs <- pretty_nr(val,low,high)
+  if (!is.character(val)) {
+    nrs <- pretty_nr(val,low,high)
+  } else {
+    nrs <- c(val, low, high)
+  }
   y <- paste0(nrs[1],sep,unit,spec," [",nrs[2],", ",nrs[3],"]", collapse = "")
   return(y)
 }#; pretty_value(837.9283745, 398.83, 0.0038, "days"); pretty_value(837.9283745, 398.83, 0.0038)
 
+omit_summary <- function(x) {
+  # Omit the summary sentence (first paragraph) from an explanation
+  #browser()
+  y <- unlist(strsplit(x,"\n\n"))
+  y <- y[-1]
+  y <- paste(y, collapse = "\n\n")
+  return(y)
+}
+
+#' @describeIn print.better_effect Print effect only
+#' @export
+#' @examples
+#' \dontshow{
+#' library(tidyverse)
+#' options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+#' }
+#' nudge("information") %>%
+#'   effect_only
+effect_only <- function(x) {
+  print.better_effect(x, effect_only = TRUE)
+}
+
 #' Print objects of `better_effect` class
 #'
 #' @param x `better_effect` object
+#' @param effect_only Whether or not to only print the effect summary. By default FALSE.
 #'
 #' @return Original `better_effect` object
 #' @export
 #'
 #' @examples
-#' eff <- nudge_to_behavior()
+#' eff <- nudge_to_behavior_d()
 #' print(eff)
-print.better_effect <- function(x) {
+print.better_effect <- function(x, effect_only = FALSE) {
   # Contrary to print, I don't allow .... NOT: argums <- list(...)
   # This generates a "checking S3 generic/method consistency" warning, but so be it
   #browser()
-  msg <- paste0(
-    if (length(x$explain) > 1) "\n\n",
-    "Call:   ", stringr::str_wrap(x$call, exdent = 2),
-    "\n",
-    ifelse(
-      length(x$params)>0,
-      stringr::str_wrap(
-        paste0("Param.: ",
-               paste( paste0(names(x$params)," = ",x$params), collapse=", ")
-               ),
-        exdent = 2
-        ),
-      ""
-    ),
-    "\n\n  Value:\n\n",
-    x$stat," in ",ifelse(is.na(x$unit),"",x$unit),":\n\n",
-    pretty_value(x$value,x$lower,x$upper),
-   "\n\n  Explanation:\n\n",
-   quiet(explanation(x, full = FALSE, truncated = TRUE)),
-   if (length(x$explain) == 1) {
-     paste0(
-       "\n\n* This is a `better_effect` object. Call `str(.)` to see it's structure.",
-       "\n** Call `explanation(.)` to get the full explanation."
-     )
-   }
-  )
+  pretty_effect <- pretty_value(x$value,x$lower,x$upper, unit = x$unit)
+  if (effect_only) {
+    msg <- pretty_effect
+  } else {
+    msg <- paste0(
+      #if (length(x$explain) > 1) "\n\n", # to leave spaces between printed stuff,
+      # e.g., effectize_1 %>% print %>% effectize_2
+      "  Effect:\n\n",
+      pretty_effect,
+      # "Call:   ", stringr::str_wrap(x$call, exdent = nchar("Param.: ")),
+      # "\n",
+      ifelse(
+        length(x$params)>0,
+        paste0("\n\n  Parameters:\n\n",stringr::str_wrap(
+          paste( paste0(names(x$params)," = ",x$params), collapse=", "),
+          exdent = 0
+        )),
+        ""
+      ),
+      # "\n\n",
+      # "in ",ifelse(is.na(x$unit),"",x$unit),
+      "\n\n  Explanation:\n\n",
+      quiet(omit_summary(explanation(x, full = FALSE, truncated = TRUE)))
+    )
+  }
+
+  #browser()
   cat(msg)
+  rlang::inform(
+    paste0(
+      "\n\n* This is a `better_effect` object. Call `str(.)` to see it's structure.",
+      "\n** Call `explanation(.)` to get the full explanation."
+    ),
+    .frequency = "once", .frequency_id = "This is a `better_effect` object"
+  )
   invisible(x)
 }
 
@@ -1377,8 +1427,8 @@ print.better_effect <- function(x) {
 #'
 #' gbd <- gbd_read()
 #'
-#' nudge_to_behavior() %>%
-#'   behavior_cd_to_pp %>%
+#' nudge_to_behavior_d() %>%
+#'   behavior_d_to_pct %>%
 #'   explanation
 explanation <- function(x, full = TRUE, truncated = FALSE) {
 
@@ -1391,8 +1441,9 @@ explanation <- function(x, full = TRUE, truncated = FALSE) {
   if (truncated) {
     expln <- 300
     if (nchar(expl) > expln*3) {
-      y <- paste0(substr(expl,1,expln), "...\n  [truncated - call `explanation(*)` for full explanation]\n...",
-                  substr(expl,nchar(expl)-expln,nchar(expl)))
+      #browser()
+      y <- paste0(substr(expl,1,expln), "... [TRUNCATED] ...",
+                  substr(expl,nchar(expl)-expln,nchar(expl)) )
     } else {
       y <- expl
     }
@@ -1402,6 +1453,10 @@ explanation <- function(x, full = TRUE, truncated = FALSE) {
   cat(y)
   invisible(y)
 }
+# nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+#   explanation(truncated = TRUE)
+# nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+#   explanation(truncated = FALSE)
 
 #' Get data on the effect sizes of nudges
 #'
@@ -1453,7 +1508,7 @@ nudge_data <- function() {
 
   attr(ds,"codebook") <- cb
 
-  message("Citation: ", txt$nudge_cite)
+  rlang::inform(paste0("Citation: ", txt$nudge_cite), .frequency = "once", .frequency_id = "Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022)")
   return(ds)
 }
 
@@ -1479,40 +1534,45 @@ pretty_call <- function(call, defaults) {
   defs <- defs[defs != ""]
   #browser()
   y <- paste0(
-    utils::capture.output(call),
+    stringr::str_squish(paste(utils::capture.output(call), collapse = "")),
     ifelse(
       length(defs) > 0,
       paste0(", with default arguments: ", paste0(names(defs)," = ",defs,collapse=", ")),
       ""
     )
   )# %>% print
+  #browser()
   return(y)
 }#; pretty_call(call, defaults)
 
 pretty_nudge <- function(behavior, nudge) {
   paste0(
-    "behavior category \"", behavior,
-    "\" and nudge category \"", nudge, "\""
+    "nudge category \"", nudge,
+    "\" and behavior category \"", behavior, "\""
   )
 }
 
 #' Given a nudge, get its effect on behavior
 #'
-#' @param behavior Category of behavior
-#' @param nudge Category of nudge
+#' Given a certain kind of nudge, get its effect on a certain kind of behavior
+#'
+#' @param behavior Category of behavior: "health", "food", or "all" (any kind of behavior)
+#' @param nudge Category of nudge: "information", "structure", "assistance", or "all" (any kind of nudge)
 #'
 #' @return Effect size, object of the `better_class` effect
 #' @export
 #'
 #' @examples
-#' nudge_to_behavior()
-nudge_to_behavior <- function(nudge = "all", behavior = "all") {
+#' nudge_to_behavior_d(nudge = "information", behavior = "food")
+nudge_to_behavior_d <- function(nudge = "all", behavior = "all") {
 
   fcall <- pretty_call(sys.call(), formals())
 
   #browser()
 
-  message("Looking up data on nudges...")
+  rlang::inform("Looking up data on nudges...", .frequency = "once", .frequency_id = "Looking up data on nudges...")
+
+  #message("Looking up data on the effect of nudges...")
 
   ds <- nudge_data()
 
@@ -1525,7 +1585,7 @@ nudge_to_behavior <- function(nudge = "all", behavior = "all") {
   rsn <- pretty_paragraphs(
     paste0(stati, " is ",pretty_value(dsi$d, dsi$low, dsi$high),"."),
     "This statistic comes from a meta-analysis on the effectiveness of nudging. This is the abstract of the original paper: \"Over the past decade, choice architecture interventions or socalled nudges have received widespread attention from both researchers and policy makers. Built on insights from the behavioral sciences, this class of behavioral interventions focuses on the design of choice environments that facilitate personally and socially desirable decisions without restricting people in their freedom of choice. Drawing on more than 200 studies reporting over 440 effect sizes (n = 2,148,439), we present a comprehensive analysis of the effectiveness of choice architecture interventions across techniques, behavioral domains, and contextual study characteristics. Our results show that choice architecture interventions overall promote behavior change with a small to medium effect size of Cohen's d = 0.43 (95% CI [0.38, 0.48]). In addition, we find that the effectiveness of choice architecture interventions varies significantly as a function of technique and domain. Across behavioral domains, interventions that target the organization and structure of choice alternatives (decision structure) consistently outperform interventions that focus on the description of alternatives (decision information) or the reinforcement of behavioral intentions (decision assistance). Food choices are particularly responsive to choice architecture interventions, with effect sizes up to 2.5 times larger than those in other behavioral domains. Overall, choice architecture interventions affect behavior relatively independently of contextual study characteristics such as the geographical location or the target population of the intervention. Our analysis further reveals a moderate publication bias toward positive results in the literature. We end with a discussion of the implications of our findings for theory and behaviorally informed policy making.\"",
-    "Citation: ", txt$nudge_cite
+    paste0("Citation: ", txt$nudge_cite)
   )#; cat(rsn)
   #message(rsn)
 
@@ -1542,19 +1602,42 @@ nudge_to_behavior <- function(nudge = "all", behavior = "all") {
     params = list(
       rei = "behavioral risks",
       location = "Global", # the cohen d s are from studies all over the world (since one of the variables they have is inside vs outside the US)
+      #sex = "both", age = "all ages",
       behavior = behavior, nudge = nudge
     )
   )
-}#; nudge_to_behavior(behavior = "health") #; behavior_impact()
+}#; nudge_to_behavior_d(behavior = "health") #; behavior_impact()
 
-nudge <- function(nudge, behavior = "all") {
-
+#' @describeIn nudge_to_behavior_d Short form with `behavior = "health"` as default
+#' @export
+#' @examples
+#' \dontshow{
+#' options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+#' }
+#' nudge("information")
+nudge <- function(nudge = "all", behavior = "health") {
+  nudge_to_behavior_d(nudge = nudge, behavior = behavior)
 }
-behavior <- function(behavior, nudge = "all") {
-
+behavior <- function(behavior = "all", nudge = "all") {
+  nudge_to_behavior_d(nudge = nudge, behavior = behavior)
 }
 
-#' Given a behavior's Cohen's, get its percentage points difference
+gbd_params <- function(x) {
+  #x <- sev
+  stopifnot(nrow(x)==1)
+  list(
+    cause = x$cause,
+    rei = x$rei,
+    metric = x$metric,
+    measure = x$measure,
+    location = x$location,
+    sex = x$sex,
+    age = x$age,
+    year = x$year
+  )
+}
+
+#' Given a behavior's Cohen's, get its percentage difference
 #'
 #' @param effect A `better_effect` object containing the Cohen's d.
 #' @param ... Parameters to be passed on to `gbd_filter`.
@@ -1579,18 +1662,24 @@ behavior <- function(behavior, nudge = "all") {
 #' # GBD functions by default read data from `gbd`. See `vignette(\"better\")`
 #' gbd <- gbd_read()
 #'
-#' nudge_to_behavior() %>%
-#'   behavior_cd_to_pp
-behavior_cd_to_pp <- function(effect, ..., data) {
+#' nudge_to_behavior_d() %>%
+#'   behavior_d_to_pct
+behavior_d_to_pct <- function(effect, ..., data) {
 
   force(effect)
 
   fcall <- pretty_call(sys.call(), formals())
 
+  #browser()
+  if (effect$unit != "standard deviations") {
+    stop("behavior_d_to_pct requires a Cohen's d as input, that is, effect$unit is \"standard deviations\".")
+  }
+
+
   if (exists("gbd", envir = rlang::caller_env())) {
     gbd <- get("gbd", envir = rlang::caller_env())
   }
-  message("\nTranslating Cohen's d into percentage point difference. Looking up data on summary exposure value...")
+  #message("Translating Cohen's d into percentage difference. Looking up data on summary exposure value...")
   data <- get_gbd(data, missing(data))
 
   rei <- effect$params$rei # TODO: allow it to be set manually
@@ -1644,42 +1733,96 @@ behavior_cd_to_pp <- function(effect, ..., data) {
   # ---------
 
   #browser()
-  # gbd_summary(params = pars)
-  # tolower_1(gbd_describe(params = pars, explain = FALSE))
+
+  # percentage point decrease:
+  pp <- effect$value*SD
+  ppl <- effect$lower*SD
+  ppu <- effect$upper*SD
+
+  before <- sev$val; before
+  after <- min(100, max(0, sev$val - pp)); after
+  # SEV between 0 and 100
+
+  # percentage decrease
+  pct <- (before - after)/before; pct
+  before*pct
+  before - after
+
+  before
+  afterL <- min(100, max(0, sev$val - ppl)); afterL
+  pctL <- (before - afterL)/before; pctL
+
+  before
+  afterU <- min(100, max(0, sev$val - ppu)); afterU
+  pctU <- (before - afterU)/before; pctU
+
+  pcth <- 100*pct
+  pcthl <- 100*pctL
+  pcthu <- 100*pctU
+
+  prt <- pretty_nr(
+    pp, ppl, ppu,
+    before,
+    after, afterL, afterU,
+    pcth, pcthl, pcthu
+  ) #%>% print
+
+  params_new <- gbd_params(sev)
+  params_new <- c(
+    effect$params[!names(effect$params) %in% names(params_new)],
+    params_new
+  )
+  params_new$cause <- NULL
+  params_new$metric <- NULL
+  params_new$measure <- NULL
 
   new_effect(
-    value = effect$value*SD,
-    lower = effect$lower*SD,
-    upper = effect$upper*SD,
-    stat = paste0("percentage point decrease in exposure to ",sev$rei),
-    unit = "percentage points",
+    value = pct,
+    lower = pctL,
+    upper = pctU,
+    stat = paste0("percentage decrease in exposure to ",sev$rei),
+    unit = "%",
     explain = c(effect$explain, pretty_paragraphs(
       paste0(
-        "We estimate that the percentage point decrease in ",sev$rei," exposure is ",
-        pretty_value(effect$value*SD, effect$lower*SD, effect$upper*SD, unit = "percentage points"),"."
+        "We estimate that the percentage decrease in ",sev$rei," exposure is ",
+        pretty_value(prt$pcth,prt$pcthl,prt$pcthu,unit="percent"),"."
         ),
-
       paste0(
-        "Note that, if the estimate has a minus sign, it indicates an increase in ",sev$rei,". ",
-        "We derive this from the ",effect$stat,
+        "Note that, if the estimate has a minus sign, it indicates an increase in ",
+        sev$rei,". "
+        ),
+      paste0(
+        "We derive the estimate from the ",effect$stat,
         ", which is ",pretty_value(effect$value,effect$lower,effect$upper),
-        ". Since Cohen's d describes the effect in terms of standard deviations, we estimate the effect in percentage point difference based on the fact that, for proportions, the standard deviation equals the square root of p*(1-p), where p is the proportion. For computational simplicity, we assume Cohen's d is calculated using the standard deviation of the control group (without a behavioral nudge) rather than the pooled standard deviation. The baseline proportion, in turn, is derived from data from the Global Burden of Disease study. According to the GBD dataset, ",
+        ". Now, to calculate the percentage decrease, we make use of data on exposure to ",sev$rei,
+        " from the Global Burden of Disease study (GBD). The GBD codebook defines the Summary Exposure Value (SEV) as a measure of a population's exposure to a risk factor that takes into account the extent of exposure by risk level and the severity of that risk's contribution to disease burden. SEV takes the value zero when no excess risk for a population exists and the value one when the population is at the highest level of risk. They report SEV on a scale from 0% to 100% to emphasize that it is risk-weighted prevalence. So, exposure is here a proportion. Since exposure is not a numeric variable, we can't use a traditional Cohen's d. However, Cohen's d essentially describes the effect in terms of standard deviations. For proportions, the standard deviation equals the square root of p*(1-p), where p is the proportion. (For computational simplicity, we assume Cohen's d is calculated using the standard deviation of the control group, without a behavioral nudge, rather than the pooled standard deviation.) We get the baseline proportion from the GBD dataset. According to this dataset, ",
         tolower_1(quiet(gbd_describe(params = pars, explain = FALSE))),
-        " Note that GBD defines the Summary Exposure Value (SEV) as a measure of a population's exposure to a risk factor that takes into account the extent of exposure by risk level and the severity of that risk's contribution to disease burden. SEV takes the value zero when no excess risk for a population exists and the value one when the population is at the highest level of risk; they report SEV on a scale from 0% to 100% to emphasize that it is risk-weighted prevalence. So the SEV is the proportion exposed. The standard deviation is then sqrt(p*(1-p)), that is, ",pretty_nr(SD)," percentage points. Our estimate of the percentage point difference simply multiplies the Cohen's d and its confidence interval by this standard deviation. If the jump from Cohen's d to proportions is difficult to follow, think of proportion data, like the Summary Exposure Value data, as numeric data with two values: 0 and 1. You can calculate the mean of that (bivalent) numeric variable as usual: you would find it equals the proportion. You can also calculate the standard deviation as usual: you would find it equals sqrt(p*(1-p)). Since we have two groups - a control group and a nudged group - you can also calculate Cohen's d as usual."
+        " The standard deviation is then sqrt(p*(1-p)), that is, ",pretty_nr(SD)," percentage points. (Note that we chose not to add an extra confidence interval here for the error on the baseline proportion, because `behavior_pct_to_disease` already adds a confidence interval based on GBD data error.) The percentage point difference (decrease) is then simply the Cohen's d and its confidence interval multiplied by this standard deviation. That tells us the percentage point decrease in exposure to ", sev$rei, " is ",
+        pretty_value(pp,ppl,ppu,unit="percentage points"),
+        ". So, exposure to ", sev$rei, " drops from ",
+        prt$before, " percent without nudge, to ",
+        pretty_value(prt$after,prt$afterU,prt$afterL,unit="percent"),
+        " with nudge. Note: If the jump from Cohen's d to proportions is difficult to follow, think of proportion data, like the Summary Exposure Value data, as numeric data with two values: 0 and 1. You can calculate the mean of that (bivalent) numeric variable as usual: you would find it equals the proportion. You can also calculate the standard deviation as usual: you would find it equals sqrt(p*(1-p)). Since we have two groups - a control group and a nudged group - you can also calculate Cohen's d as usual."
       ),
-
+      paste0(
+        "The last step is to translate this percentage point decrease into a percentage decrease. Now, a percentage decrease is just the percentage points decrease divided by the baseline proportion, that is, ",
+        pretty_value(prt$pp,prt$ppl,prt$ppu,unit="percentage points"),
+        ", divided by ", prt$before, ". This tells us the percentage decrease is ",
+        pretty_value(prt$pcth,prt$pcthl,prt$pcthu,unit="percent"), "."
+      ),
       txt$gbd_boiler
     )),
     call = fcall,
-    params = effect$params
+    params = params_new
   ) #%>% explanation # uncomment ???
 
 }
-# nudge_to_behavior(behavior = "health", nudge = "information") %>%
-#   print %>%
-#   behavior_cd_to_pp(cause = "cardiovascular diseases") %>%
-#   print %>%
-#   explanation
+if (FALSE) {
+  nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+    #print %>%
+    behavior_d_to_pct(cause = "cardiovascular diseases") #%>% print %>% explanation
+}
+
 
 #gbd_read(load = TRUE) # ???
 
@@ -1714,7 +1857,7 @@ pretty_interval <- function(val, lower, upper, measure, metric) {
   )
 }#; pretty_interval(10.8987,8.1,11.89,"DALYs","rate")
 
-#' Given a behavior effect, get a disease effect
+#' Given a behavior effect in percentage points, get the disease effect
 #'
 #' @param effect The behavior effect to be translated into a disease effect, class `better_effect`
 #' @param cause The disease, that is, the cause of mortality and/or disability
@@ -1739,10 +1882,10 @@ pretty_interval <- function(val, lower, upper, measure, metric) {
 #'
 #' library(tidyverse)
 #'
-#' nudge_to_behavior(behavior = "health", nudge = "information") %>%
-#' behavior_cd_to_pp %>%
-#'   behavior_to_disease(cause = "cardiovascular diseases")
-behavior_to_disease <- function(
+#' nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+#' behavior_d_to_pct %>%
+#'   behavior_pct_to_disease(cause = "cardiovascular diseases")
+behavior_pct_to_disease <- function(
   effect,
   cause,
   measure = "DALYs", #best just display: c("deaths", "YLLs", "YLDs", "DALYs"), # They don't have this for Risks: "life expectancy","HALE"
@@ -1752,13 +1895,17 @@ behavior_to_disease <- function(
   # from behavior impact to DALYs impact
 
   #browser()
+  if (effect$stat != paste0("percentage decrease in exposure to ",effect$params$rei)) {
+    #browser()
+    stop("behavior_pct_to_disease requires that effect$stat is \"percentage decrease in exposure to ",effect$params$rei,"\". Actual value: ", effect$stat)
+  }
 
   fcall <- pretty_call(sys.call(), formals())
 
   if (exists("gbd", envir = rlang::caller_env())) {
     gbd <- get("gbd", envir = rlang::caller_env())
   }
-  message("Looking up data on cause of disease/disability...")
+  #message("Looking up data on cause of disease/disability...")
   data <- get_gbd(data, missing(data))
   #browser()
   #cause <- c(list(...),effect$params)$cause
@@ -1832,42 +1979,30 @@ behavior_to_disease <- function(
   # Lowering the risk exposure means proportionally lowering deaths etc
   # We assume that zero risk exposure means zero deaths (= correct, because of GBD definitions)
 
-  before <- sct$val[sct$measure %in% "summary exposure value"]; before
-  after <- min(100, max(0, sct$val[sct$measure %in% "summary exposure value"] - effect$value)); after
-  # SEV between 0 and 100
-  pct <- (before - after)/before; pct
-  before*pct
-  before - after
-
-  before
-  afterL <- min(100, max(0, sct$val[sct$measure %in% "summary exposure value"] - effect$lower)); afterL
-  pctL <- (before - afterL)/before; pctL
-
-  before
-  afterU <- min(100, max(0, sct$val[sct$measure %in% "summary exposure value"] - effect$upper)); afterU
-  pctU <- (before - afterU)/before; pctU
-
-  #effect %>% str
-
-  #scti$val*pct
-
-
-  #browser()
+  before <- sct$val[sct$measure %in% "summary exposure value"]
 
   nrs <- pretty_nr(
-    exposure_change = effect$value,
-    exposure_before = before,
-    exposure_after = after,
-    harm_before = scti$val,
-    pct = pct,
-    pctL = pctL,
-    pctU = pctU
+    # exposure_change = effect$value,
+    # exposure_before = before,
+    # exposure_after = after,
+    #harm_before = scti$val,
+    pct = effect$value*100,
+    pctL = effect$lower*100,
+    pctU = effect$upper*100
     #, harm_disease = NA
   ) #%>% print
 
-  vl <- scti$val*pct
-  lw <- scti$lower*pctL # ? how calculate ? scti$lower - scti$lower*pctL ?
-  up <- scti$upper*pctU
+  vl <- scti$val*effect$value
+  lw <- scti$lower*effect$lower # ? how calculate ? scti$lower - scti$lower*effect$lower ?
+  up <- scti$upper*effect$upper
+
+  #browser()
+
+  params_new <- gbd_params(scti)
+  params_new <- c(
+    effect$params[!names(effect$params) %in% names(params_new)],
+    params_new
+  )
 
   #browser()
 
@@ -1887,19 +2022,17 @@ behavior_to_disease <- function(
         "Here is how we arrive at this estimate. We previously estimated that the ",
         effect$stat, " is ",
         pretty_value(effect$value,effect$lower,effect$upper,unit=effect$unit),
-        ", taking ",rei," exposure from ",nrs$exposure_before, "% without nudge to ", pretty_value(after,afterU,afterL,unit="%", pct_100 = FALSE),
-        ", with nudge. The percentage point difference is ",pretty_value(pct, pctL, pctU, unit = "%"),
-        ", of the exposure value without nudge. We also know that at ",nrs$exposure_before,"%, exposure to ",rei,
-        " costs ",nrs$harm_before," ",gbd_unit(measure = measure, metric = metric)," due to ",cause, ". That is, we know from the GBD data that ",
+        ". We also know that at ",pretty_nr(before, always_vector = TRUE),"%, exposure to ",rei,
+        " costs ",pretty_nr(scti$val)," ",gbd_unit(measure = measure, metric = metric)," due to ",cause, ". That is, we know from the GBD data that ",
         tolower_1(gbd_describe(params = parsi, explain = FALSE)),
-        " The last step is to take ", pretty_value(pct, pctL, pctU, unit = "%"),
+        " The last step is to take ", pretty_value(effect$value,effect$lower,effect$upper,unit=effect$unit),
         ", of ",pretty_value(scti$val, scti$lower, scti$upper, unit = measure),
         ", and to combine both confidence intervals. That gives us the estimate that the nudge saves ", pretty_interval(vl,lw,up, measure = measure, metric = metric),"."
       ), #<----
       txt$gbd_boiler
     ) ),
     call = fcall,
-    params = effect$params
+    params = params_new
   )) #%>% explanation # ???
 
   return(y)
@@ -1909,20 +2042,103 @@ if (FALSE) {
 
   dvl_options()
   gbd_load()
-  nudge_to_behavior(behavior = "health", nudge = "information") %>%
-    behavior_cd_to_pp %>%
+  nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+    behavior_d_to_pct %>%
     explanation
-  nudge_to_behavior(behavior = "health", nudge = "information") %>%
-    behavior_cd_to_pp %>%
-    behavior_to_disease(cause = "cardiovascular diseases") # is with global nudges, so can't do: location = "United States of America"
+  nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+    behavior_d_to_pct %>%
+    behavior_pct_to_disease(cause = "cardiovascular diseases") # is with global nudges, so can't do: location = "United States of America"
 }
 
-disease <- function(cause) {
+#' Create an effect based on Cohen's d
+#'
+#' @param value Value of the effect
+#' @param lower Lower boundary of 95% confidence interval
+#' @param upper Upper boundary of 95% confidence interval
+#'
+#' @return Effect
+#' @export
+#'
+#' @examples
+#' behavior_d(.2)
+behavior_d <- function(value = .5, lower = NA, upper = NA) {
+  fcall <- pretty_call(sys.call(), formals())
+  new_effect(
+    value = value,
+    lower = lower,
+    upper = upper,
+    stat = "Cohen's d",
+    unit = "standard deviations",
+    explain = paste0(
+      pretty_value(value,lower,upper,unit = "standard deviations"),
+      "\n\nThis is a manually inserted Cohen's d."
+    ),
+    call = fcall,
+    params = list(
+      rei = "behavioral risks"
+    )
+  )
+}#; behavior_d(.56)
+
+#' @describeIn behavior_d Create an effect based on a percentage decrease
+#' @export
+#' @examples
+#' behavior_pct(15)
+behavior_pct <- function(value, lower = NA, upper = NA) {
+  fcall <- pretty_call(sys.call(), formals())
+  new_effect(
+    value = value,
+    lower = lower,
+    upper = upper,
+    stat = "percentage decrease in exposure to behavioral risks",
+    unit = "percentage points",
+    explain = paste0(
+      pretty_value(value,lower,upper,unit = "percentage"),
+      "\n\nThis is a manually inserted percentage difference."
+    ),
+    call = fcall,
+    params = list(
+      rei = "behavioral risks"
+    )
+  )
 
 }
+
+#' @describeIn behavior_pct_to_disease Given a behavior effect in Cohen's d, get the disease effect
+#' @export
+#' @examples
+#' \dontshow{
+#' options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+#' }
+disease <- function(
+  effect = nudge(nudge = "all", behavior = "health"),
+  cause = "all causes",
+  measure = "DALYs",
+  metric = "rate",
+  ...
+) {
+  #browser()
+  if (effect$unit == "standard deviations") {
+    y <- quiet(behavior_d_to_pct(effect))
+  } else if (effect$stat == paste0("percentage decrease in exposure to ",effect$params$rei)) {
+    y <- effect
+  } else {
+    stop("No valid effect inputted: Input either a Cohen's d, or a percentage diffference.")
+  }
+
+  y <- quiet(behavior_pct_to_disease(
+    effect = y,
+    cause = cause,
+    measure = measure,
+    metric = metric,
+    ...
+  ))
+  return(y)
+}
+#nudge("information") %>% disease("cardiovascular diseases")
 
 nudge_to_disease <- function(nudge, disease) {
-
+  # not good! just do nudge %>% disease, or just do disease dry?? implement
 }
 
 #gbd_describe_cause("cardiovascular diseases")

@@ -4,10 +4,10 @@
 \alias{gbd_load}
 \title{Load cleaned Global Burden of Disease data}
 \usage{
-gbd_load(path, assign_to = "gbd")
+gbd_load(..., assign_to = "gbd")
 }
 \arguments{
-\item{path}{Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.}
+\item{...}{Passed on to \code{gbd_read}.}
 
 \item{assign_to}{What variable name to assign the GBD dataset to.}
 }
