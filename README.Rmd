@@ -1,7 +1,8 @@
 ---
 output: github_document
 ---
- 
+
+<!-- Edit this to prevent git error: 9827634 -->
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}

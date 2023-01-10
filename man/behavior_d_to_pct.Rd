@@ -2,7 +2,7 @@
 % Please edit documentation in R/gbd_clean.R
 \name{behavior_d_to_pct}
 \alias{behavior_d_to_pct}
-\title{Given a behavior's Cohen's, get its percentage difference}
+\title{Given a behavior's Cohen's d, get its percentage difference}
 \usage{
 behavior_d_to_pct(effect, ..., data)
 }
@@ -17,7 +17,7 @@ behavior_d_to_pct(effect, ..., data)
 A \code{better_effect} object containing the percentage difference.
 }
 \description{
-Given a behavior's Cohen's, get its percentage difference
+Given a behavior's Cohen's d, get its percentage difference
 }
 \examples{
 \dontshow{

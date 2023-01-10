@@ -1,10 +1,10 @@
 Package: better
-Title: What the Package Does (One Line, Title Case)
+Title: Make guestimates about the impact of health nudges
 Version: 0.0.0.9000
 Authors@R: 
     person("Jan", "Lindemans", , "janwillem.lindemans@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0002-3702-8651"))
-Description: What the package does (one paragraph).
+Description: Tell `better` what kind of behavioral nudge you are considering, and what disease you are targetting, and `better` will give you guestimates about its impact on reducing deaths and disability. It primarily uses data from the Global Burden of Disease study.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

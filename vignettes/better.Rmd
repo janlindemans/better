@@ -96,7 +96,7 @@ If you haven't used `.Rprofile` before, it's a hidden file with code that R runs
 
 ## Quick intro to effects
 
-```{r, echo = FALSE}
+```{r, include = FALSE}
 library(better)
 library(tidyverse)
 # So that the once-per-session messages are gone:
@@ -122,7 +122,7 @@ nudge("information") %>%
   disease("cardiovascular diseases")
 ```
 
-You get some rich output, but the main thing is the number below "Value": `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)}`. What does it mean? If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)}` years. Note that disability adjusted life years (DALYs) refers to healthy life years - life years without disease or disability.
+You get some rich output, but the main thing is the number below "Value": `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)} %>% format(big.mark = ",")`. What does it mean? If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)}` years. Note that disability adjusted life years (DALYs) refers to healthy life years - life years without disease or disability.
 
 We can get the full explanation of the guesstimate with `better::explanation`:
 

@@ -9,7 +9,7 @@ explanation(x, full = TRUE, truncated = FALSE)
 \arguments{
 \item{x}{\code{better_effect} object}
 
-\item{full}{Get full explanation or partial explanation}
+\item{full}{Get full explanation of all steps or only last step}
 
 \item{truncated}{Whether or not to truncate long explanations}
 }

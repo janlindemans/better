@@ -1,9 +1,3 @@
-# TODO: test
-# automatic gbd_save if no rds file found (in gbd_read)
-# default rds file with package - needs agreement. Also loads if no data found on given path
-# Figure out risk behaviors: sometimes POSITIVE impact on health. Code for that!
-
-
 txt <- list(
   gbd_cite = "Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.",
   nudge_cite = "Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118",
@@ -1284,7 +1278,10 @@ new_effect <- function(
   upper = NA_real_,
   stat = NA,
   unit = NA,
+  describe = NA,
   explain = NA,
+  reference = NA,
+  terms = NA,
   call = NA,
   params = list()
 ) {
@@ -1297,7 +1294,10 @@ new_effect <- function(
     upper = upper,
     stat = stat,
     unit = unit,
+    describe = describe,
     explain = explain,
+    reference = reference,
+    terms = terms,
     call = call,
     params = params
   )
@@ -1387,7 +1387,11 @@ print.better_effect <- function(x, effect_only = FALSE) {
       # "\n\n",
       # "in ",ifelse(is.na(x$unit),"",x$unit),
       "\n\n  Explanation:\n\n",
-      quiet(omit_summary(explanation(x, full = FALSE, truncated = TRUE)))
+      quiet(explanation(x, full = FALSE, truncated = TRUE)), # used to have: omit_summary
+      ifelse(
+        is.na(x$terms), "",
+        paste0("\n\n  Terms:\n\n", x$terms)
+      )
     )
   }
 
@@ -1406,7 +1410,7 @@ print.better_effect <- function(x, effect_only = FALSE) {
 #' Get explanation of `better_effect` object
 #'
 #' @param x `better_effect` object
-#' @param full Get full explanation or partial explanation
+#' @param full Get full explanation of all steps or only last step
 #' @param truncated Whether or not to truncate long explanations
 #'
 #' @return Explanation as string
@@ -1432,12 +1436,20 @@ print.better_effect <- function(x, effect_only = FALSE) {
 #'   explanation
 explanation <- function(x, full = TRUE, truncated = FALSE) {
 
-  expl <- x$explain
-  if (full) {
-    expl <- paste(expl,collapse = "\n\n----\n\n")
+  #browser()
+
+  expl <- paste(x$explain, x$reference, sep = "\n\nSee:\n")
+
+  if (full & length(expl) > 1) {
+    expl <- purrr::map_chr(1:length(expl),~{
+      paste0("Step ", .x, ":\n\n", x$describe[.x], "\n\n", expl[.x])
+    })
+    expl <- paste(expl, collapse = "\n\n")
+
   } else {
     expl <- utils::tail(expl, 1)
   }
+
   if (truncated) {
     expln <- 300
     if (nchar(expl) > expln*3) {
@@ -1583,9 +1595,9 @@ nudge_to_behavior_d <- function(nudge = "all", behavior = "all") {
   # reason:
   stati <- paste0("Cohen's d for ",pretty_nudge(behavior=dsi$behavior,nudge=dsi$nudge))
   rsn <- pretty_paragraphs(
-    paste0(stati, " is ",pretty_value(dsi$d, dsi$low, dsi$high),"."),
-    "This statistic comes from a meta-analysis on the effectiveness of nudging. This is the abstract of the original paper: \"Over the past decade, choice architecture interventions or socalled nudges have received widespread attention from both researchers and policy makers. Built on insights from the behavioral sciences, this class of behavioral interventions focuses on the design of choice environments that facilitate personally and socially desirable decisions without restricting people in their freedom of choice. Drawing on more than 200 studies reporting over 440 effect sizes (n = 2,148,439), we present a comprehensive analysis of the effectiveness of choice architecture interventions across techniques, behavioral domains, and contextual study characteristics. Our results show that choice architecture interventions overall promote behavior change with a small to medium effect size of Cohen's d = 0.43 (95% CI [0.38, 0.48]). In addition, we find that the effectiveness of choice architecture interventions varies significantly as a function of technique and domain. Across behavioral domains, interventions that target the organization and structure of choice alternatives (decision structure) consistently outperform interventions that focus on the description of alternatives (decision information) or the reinforcement of behavioral intentions (decision assistance). Food choices are particularly responsive to choice architecture interventions, with effect sizes up to 2.5 times larger than those in other behavioral domains. Overall, choice architecture interventions affect behavior relatively independently of contextual study characteristics such as the geographical location or the target population of the intervention. Our analysis further reveals a moderate publication bias toward positive results in the literature. We end with a discussion of the implications of our findings for theory and behaviorally informed policy making.\"",
-    paste0("Citation: ", txt$nudge_cite)
+    #paste0(stati, " is ",pretty_value(dsi$d, dsi$low, dsi$high),"."),
+    "This statistic comes from a meta-analysis on the effectiveness of nudging. This is the abstract of the original paper: \"Over the past decade, choice architecture interventions or socalled nudges have received widespread attention from both researchers and policy makers. Built on insights from the behavioral sciences, this class of behavioral interventions focuses on the design of choice environments that facilitate personally and socially desirable decisions without restricting people in their freedom of choice. Drawing on more than 200 studies reporting over 440 effect sizes (n = 2,148,439), we present a comprehensive analysis of the effectiveness of choice architecture interventions across techniques, behavioral domains, and contextual study characteristics. Our results show that choice architecture interventions overall promote behavior change with a small to medium effect size of Cohen's d = 0.43 (95% CI [0.38, 0.48]). In addition, we find that the effectiveness of choice architecture interventions varies significantly as a function of technique and domain. Across behavioral domains, interventions that target the organization and structure of choice alternatives (decision structure) consistently outperform interventions that focus on the description of alternatives (decision information) or the reinforcement of behavioral intentions (decision assistance). Food choices are particularly responsive to choice architecture interventions, with effect sizes up to 2.5 times larger than those in other behavioral domains. Overall, choice architecture interventions affect behavior relatively independently of contextual study characteristics such as the geographical location or the target population of the intervention. Our analysis further reveals a moderate publication bias toward positive results in the literature. We end with a discussion of the implications of our findings for theory and behaviorally informed policy making.\""
+    #paste0("Citation: ", txt$nudge_cite)
   )#; cat(rsn)
   #message(rsn)
 
@@ -1597,7 +1609,10 @@ nudge_to_behavior_d <- function(nudge = "all", behavior = "all") {
     upper = dsi$high,
     stat = stati,
     unit = "standard deviations",
+    describe = paste0(stati, " is ",pretty_value(dsi$d, dsi$low, dsi$high),"."),
     explain = rsn,
+    reference = txt$nudge_cite,
+    terms = NA,
     call = fcall,
     params = list(
       rei = "behavioral risks",
@@ -1637,7 +1652,7 @@ gbd_params <- function(x) {
   )
 }
 
-#' Given a behavior's Cohen's, get its percentage difference
+#' Given a behavior's Cohen's d, get its percentage difference
 #'
 #' @param effect A `better_effect` object containing the Cohen's d.
 #' @param ... Parameters to be passed on to `gbd_filter`.
@@ -1782,13 +1797,13 @@ behavior_d_to_pct <- function(effect, ..., data) {
     upper = pctU,
     stat = paste0("percentage decrease in exposure to ",sev$rei),
     unit = "%",
+    describe = c(effect$describe, paste0(
+      "We estimate that the percentage decrease in ",sev$rei," exposure is ",
+      pretty_value(prt$pcth,prt$pcthl,prt$pcthu,unit="percent"),"."
+    )),
     explain = c(effect$explain, pretty_paragraphs(
       paste0(
-        "We estimate that the percentage decrease in ",sev$rei," exposure is ",
-        pretty_value(prt$pcth,prt$pcthl,prt$pcthu,unit="percent"),"."
-        ),
-      paste0(
-        "Note that, if the estimate has a minus sign, it indicates an increase in ",
+        "Note: If the estimate has a minus sign, it indicates an increase in ",
         sev$rei,". "
         ),
       paste0(
@@ -1809,20 +1824,25 @@ behavior_d_to_pct <- function(effect, ..., data) {
         pretty_value(prt$pp,prt$ppl,prt$ppu,unit="percentage points"),
         ", divided by ", prt$before, ". This tells us the percentage decrease is ",
         pretty_value(prt$pcth,prt$pcthl,prt$pcthu,unit="percent"), "."
-      ),
-      txt$gbd_boiler
+      )
     )),
+    reference = c(effect$reference,txt$gbd_cite),
+    terms = c(effect$terms,txt$gbd_boiler),
     call = fcall,
     params = params_new
   ) #%>% explanation # uncomment ???
 
 }
 if (FALSE) {
-  nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+  eff <- nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
     #print %>%
     behavior_d_to_pct(cause = "cardiovascular diseases") #%>% print %>% explanation
+  eff
+  eff %>% explanation
+  eff$describe
+  #eff$explain
+  eff$reference
 }
-
 
 #gbd_read(load = TRUE) # ???
 
@@ -2012,12 +2032,15 @@ behavior_pct_to_disease <- function(
     upper = up,
     stat = measure,
     unit = gbd_unit(measure = measure, metric = metric),
-    explain = c( effect$explain, pretty_paragraphs(
+    describe = c(
+      effect$describe,
       paste0(
         "We estimate that a behavioral intervention in ",pretty_nudge(behavior=effect$params$behavior,nudge=effect$params$nudge), # msrs$explain[msrs$measure == measure]
         " that targets " , cause,
         " saves ", pretty_interval(vl,lw,up, measure = measure, metric = metric),"."
-      ),
+      )
+    ),
+    explain = c( effect$explain, pretty_paragraphs(
       paste0(
         "Here is how we arrive at this estimate. We previously estimated that the ",
         effect$stat, " is ",
@@ -2028,9 +2051,10 @@ behavior_pct_to_disease <- function(
         " The last step is to take ", pretty_value(effect$value,effect$lower,effect$upper,unit=effect$unit),
         ", of ",pretty_value(scti$val, scti$lower, scti$upper, unit = measure),
         ", and to combine both confidence intervals. That gives us the estimate that the nudge saves ", pretty_interval(vl,lw,up, measure = measure, metric = metric),"."
-      ), #<----
-      txt$gbd_boiler
+      )
     ) ),
+    reference = c(effect$reference,txt$gbd_cite),
+    terms = c(effect$terms,txt$gbd_boiler),
     call = fcall,
     params = params_new
   )) #%>% explanation # ???
@@ -2042,7 +2066,7 @@ if (FALSE) {
 
   dvl_options()
   gbd_load()
-  nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+  eff <- nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
     behavior_d_to_pct %>%
     explanation
   nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
@@ -2050,7 +2074,7 @@ if (FALSE) {
     behavior_pct_to_disease(cause = "cardiovascular diseases") # is with global nudges, so can't do: location = "United States of America"
 }
 
-#' Create an effect based on Cohen's d
+#' Create an effect based on a Cohen's d
 #'
 #' @param value Value of the effect
 #' @param lower Lower boundary of 95% confidence interval

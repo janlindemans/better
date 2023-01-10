@@ -3,7 +3,7 @@
 \name{behavior_d}
 \alias{behavior_d}
 \alias{behavior_pct}
-\title{Create an effect based on Cohen's d}
+\title{Create an effect based on a Cohen's d}
 \usage{
 behavior_d(value = 0.5, lower = NA, upper = NA)
 
@@ -20,7 +20,7 @@ behavior_pct(value, lower = NA, upper = NA)
 Effect
 }
 \description{
-Create an effect based on Cohen's d
+Create an effect based on a Cohen's d
 }
 \section{Functions}{
 \itemize{

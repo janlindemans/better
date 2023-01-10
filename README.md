@@ -1,4 +1,5 @@
 
+<!-- Edit this to prevent git error: 9827634 -->
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # better
@@ -180,12 +181,11 @@ nudge_to_behavior_d(nudge = "information", behavior = "health")
 #> 
 #> This statistic comes from a meta-analysis on the effectiveness of nudging.
 #> This is the abstract of the original paper: "Over the past decade, choice
-#> architecture interventions or socalled nudges ... [TRUNCATED] ...ing."
+#> architecture interventions or socalled nudges have received widespread attention
+#> from both researchers and policy makers. Built on insights from the be... [TRUNCATED] ...y making."
 #> 
-#> Citation: Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The
-#> effectiveness of nudging: A meta-analysis of choice architecture interventions
-#> across behavioral domains. Proceedings of the National Academy of Sciences,
-#> 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
+#> See:
+#> Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
 #> 
 #> 
 #> * This is a `better_effect` object. Call `str(.)` to see it's structure.
@@ -227,17 +227,40 @@ nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
 #> 
 #>   Explanation:
 #> 
-#> Note that, if the estimate has a minus sign, it indicates an increase in
-#> behavioral risks.
+#> Note: If the estimate has a minus sign, it indicates an increase in behavioral
+#> risks.
 #> 
 #> We derive the estimate from the Cohen's d for nudge category "information"
-#> and behavior categor... [TRUNCATED] ...centage points, 95% CI
-#> [3.24, 15.49], divided by 15.33. This tells us the percentage decrease is 61.09
+#> and behavior category "health", which is 0.26, 95% CI [0.09, 0.43]. Now, to
+#> calculate the percentage decrease, we make use of data on expo... [TRUNCATED] ...decrease is 61.09
 #> percent, 95% CI [21.15, 100.00].
 #> 
-#> Source: Institute for Health Metrics and Evaluation. Used with permission.
-#> All rights reserved. For details, including how to cite the source, call
-#> `gbd_license()`.
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.   Effect:
+#> 
+#> 61.1%, 95% CI [21.1, 100.0]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = information, rei = behavioral risks, location =
+#> Global, sex = both, age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Note: If the estimate has a minus sign, it indicates an increase in behavioral
+#> risks.
+#> 
+#> We derive the estimate from the Cohen's d for nudge category "information"
+#> and behavior category "health", which is 0.26, 95% CI [0.09, 0.43]. Now, to
+#> calculate the percentage decrease, we make use of data on expo... [TRUNCATED] ...decrease is 61.09
+#> percent, 95% CI [21.15, 100.00].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.
 ```
 
 This gives us a decrease of 0.6 percentage points.
@@ -261,13 +284,62 @@ nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
 #>   Explanation:
 #> 
 #> Here is how we arrive at this estimate. We previously estimated that the
-#> percentage decrease in e... [TRUNCATED] ...combine
-#> both confidence intervals. That gives us the estimate that the nudge saves 1,630
+#> percentage decrease in exposure to behavioral risks is 61.1%, 95% CI [21.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 2,668
+#> DALYs per 100,000 people due to cardiovascular diseases. That is, we know
+#> ... [TRUNCATED] ...630
 #> DALYs per 100,000 people, 95% CI [502, 3,029].
 #> 
-#> Source: Institute for Health Metrics and Evaluation. Used with permission.
-#> All rights reserved. For details, including how to cite the source, call
-#> `gbd_license()`.
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.   Effect:
+#> 
+#> 1,630 DALYs per 100,000 people, 95% CI [502, 3,029]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = information, cause = cardiovascular diseases, rei =
+#> behavioral risks, metric = rate, measure = DALYs, location = Global, sex = both,
+#> age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Here is how we arrive at this estimate. We previously estimated that the
+#> percentage decrease in exposure to behavioral risks is 61.1%, 95% CI [21.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 2,668
+#> DALYs per 100,000 people due to cardiovascular diseases. That is, we know
+#> ... [TRUNCATED] ...630
+#> DALYs per 100,000 people, 95% CI [502, 3,029].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.   Effect:
+#> 
+#> 1,630 DALYs per 100,000 people, 95% CI [502, 3,029]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = information, cause = cardiovascular diseases, rei =
+#> behavioral risks, metric = rate, measure = DALYs, location = Global, sex = both,
+#> age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Here is how we arrive at this estimate. We previously estimated that the
+#> percentage decrease in exposure to behavioral risks is 61.1%, 95% CI [21.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 2,668
+#> DALYs per 100,000 people due to cardiovascular diseases. That is, we know
+#> ... [TRUNCATED] ...630
+#> DALYs per 100,000 people, 95% CI [502, 3,029].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.
 ```
 
 ``` r
@@ -326,13 +398,59 @@ nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
 #>   Explanation:
 #> 
 #> Here is how we arrive at this estimate. We previously estimated that the
-#> percentage decreas... [TRUNCATED] ...ombine
-#> both confidence intervals. That gives us the estimate that the nudge saves 251.5
+#> percentage decrease in exposure to behavioral risks is 61.1%, 95% CI [21.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 412
+#> DALYs per 100,000 people due to diabetes and kidney diseases. That is, we kn... [TRUNCATED] ....5
 #> DALYs per 100,000 people, 95% CI [69.5, 505.5].
 #> 
-#> Source: Institute for Health Metrics and Evaluation. Used with permission.
-#> All rights reserved. For details, including how to cite the source, call
-#> `gbd_license()`.
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.   Effect:
+#> 
+#> 251.5 DALYs per 100,000 people, 95% CI [69.5, 505.5]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = information, cause = diabetes and kidney diseases,
+#> rei = behavioral risks, metric = rate, measure = DALYs, location = Global, sex =
+#> both, age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Here is how we arrive at this estimate. We previously estimated that the
+#> percentage decrease in exposure to behavioral risks is 61.1%, 95% CI [21.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 412
+#> DALYs per 100,000 people due to diabetes and kidney diseases. That is, we kn... [TRUNCATED] ....5
+#> DALYs per 100,000 people, 95% CI [69.5, 505.5].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.   Effect:
+#> 
+#> 251.5 DALYs per 100,000 people, 95% CI [69.5, 505.5]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = information, cause = diabetes and kidney diseases,
+#> rei = behavioral risks, metric = rate, measure = DALYs, location = Global, sex =
+#> both, age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Here is how we arrive at this estimate. We previously estimated that the
+#> percentage decrease in exposure to behavioral risks is 61.1%, 95% CI [21.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 412
+#> DALYs per 100,000 people due to diabetes and kidney diseases. That is, we kn... [TRUNCATED] ....5
+#> DALYs per 100,000 people, 95% CI [69.5, 505.5].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.
 ```
 
 What if we tried a structural nudge?
@@ -354,11 +472,57 @@ nudge_to_behavior_d(nudge = "structure", behavior = "health") %>%
 #>   Explanation:
 #> 
 #> Here is how we arrive at this estimate. We previously estimated that the
-#> percentage decrease in ex... [TRUNCATED] ... to combine both
-#> confidence intervals. That gives us the estimate that the nudge saves 412 DALYs
+#> percentage decrease in exposure to behavioral risks is 100.0%, 95% CI [68.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 412 DALYs
+#> per 100,000 people due to diabetes and kidney diseases. That is, we k... [TRUNCATED] ...s 412 DALYs
 #> per 100,000 people, 95% CI [224, 506].
 #> 
-#> Source: Institute for Health Metrics and Evaluation. Used with permission.
-#> All rights reserved. For details, including how to cite the source, call
-#> `gbd_license()`.
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.   Effect:
+#> 
+#> 412 DALYs per 100,000 people, 95% CI [224, 506]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = structure, cause = diabetes and kidney diseases, rei
+#> = behavioral risks, metric = rate, measure = DALYs, location = Global, sex =
+#> both, age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Here is how we arrive at this estimate. We previously estimated that the
+#> percentage decrease in exposure to behavioral risks is 100.0%, 95% CI [68.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 412 DALYs
+#> per 100,000 people due to diabetes and kidney diseases. That is, we k... [TRUNCATED] ...s 412 DALYs
+#> per 100,000 people, 95% CI [224, 506].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.   Effect:
+#> 
+#> 412 DALYs per 100,000 people, 95% CI [224, 506]
+#> 
+#>   Parameters:
+#> 
+#> behavior = health, nudge = structure, cause = diabetes and kidney diseases, rei
+#> = behavioral risks, metric = rate, measure = DALYs, location = Global, sex =
+#> both, age = all ages, year = 2019
+#> 
+#>   Explanation:
+#> 
+#> Here is how we arrive at this estimate. We previously estimated that the
+#> percentage decrease in exposure to behavioral risks is 100.0%, 95% CI [68.1,
+#> 100.0]. We also know that at 15.3%, exposure to behavioral risks costs 412 DALYs
+#> per 100,000 people due to diabetes and kidney diseases. That is, we k... [TRUNCATED] ...s 412 DALYs
+#> per 100,000 people, 95% CI [224, 506].
+#> 
+#> See:
+#> Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/.
+#> 
+#>   Terms:
+#> 
+#> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved. For details, including how to cite the source, call `gbd_license()`.
 ```
