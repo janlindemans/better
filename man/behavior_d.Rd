@@ -3,28 +3,28 @@
 \name{behavior_d}
 \alias{behavior_d}
 \alias{behavior_pct}
-\title{Create an effect based on a Cohen's d}
+\title{Manually create a Cohen's d effect}
 \usage{
 behavior_d(value = 0.5, lower = NA, upper = NA)
 
-behavior_pct(value, lower = NA, upper = NA)
+behavior_pct(value = 1, lower = NA, upper = NA)
 }
 \arguments{
-\item{value}{Value of the effect}
+\item{value}{Value of the effect, either Cohen's d or percentage difference, with default}
 
-\item{lower}{Lower boundary of 95\% confidence interval}
+\item{lower}{Lower boundary of 95\% confidence interval, by default NA}
 
-\item{upper}{Upper boundary of 95\% confidence interval}
+\item{upper}{Upper boundary of 95\% confidence interval, by default NA}
 }
 \value{
-Effect
+Effect, class \code{better_effect}
 }
 \description{
-Create an effect based on a Cohen's d
+Create an effect of the class \code{better_effect} based on a Cohen's d, with \code{behavior_d()}, or based on a percentage difference, with \code{behavior_pct()}.
 }
 \section{Functions}{
 \itemize{
-\item \code{behavior_pct()}: Create an effect based on a percentage decrease
+\item \code{behavior_pct()}: Create an effect based on a percentage difference.
 
 }}
 \examples{

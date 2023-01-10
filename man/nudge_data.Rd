@@ -12,6 +12,14 @@ Data on the effect sizes of nudges
 \description{
 This data is used by other \code{better} functions.
 }
+\section{Source and citation}{
+The data comes from the following article:
+
+Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118
+
+When using this data, cite it appropriately.
+}
+
 \examples{
 nudge_data()
 }

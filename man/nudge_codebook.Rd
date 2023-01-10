@@ -4,20 +4,20 @@
 \alias{nudge_codebook}
 \title{Get the codebook for the nudge data}
 \usage{
-nudge_codebook(x = nudge_data())
+nudge_codebook(x = quiet(nudge_data()))
 }
 \arguments{
 \item{x}{Nudge dataset, by default automatically read.}
 }
 \value{
-Codebook, dataframe.
+Codebook, data frame.
 }
 \description{
 Get the codebook for the nudge data
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+NULL
 }
 nudge_codebook()
 }

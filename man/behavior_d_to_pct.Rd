@@ -11,30 +11,26 @@ behavior_d_to_pct(effect, ..., data)
 
 \item{...}{Parameters to be passed on to \code{gbd_filter}.}
 
-\item{data}{GBD data as \code{gbd_dataset} object.}
+\item{data}{GBD dataset, of \code{gbd_dataset} class. By default, \code{gbd} is used, if it exists. To learn more, call \code{better_vignette(better)}.}
 }
 \value{
 A \code{better_effect} object containing the percentage difference.
 }
 \description{
-Given a behavior's Cohen's d, get its percentage difference
+Given a behavior's Cohen's d as better_effect, get its percentage difference as better_effect. The primary use of this function is as an intermediate step between \code{nudge_to_behavior_d()} and \code{behavior_pct_to_disease()}. It is implicitly used by \code{disease()}.
+}
+\details{
+A better_effect is a guesstimate rather than a rigorous impact analysis. Use it with caution. Check out the full calculation with \code{explanation(.)}.
+The calculation uses data from the following source:
+Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved..
+The authors and owners of these data retain all rights to their data. Also, they were not involved in the creation of \code{better}, and bear no responsibility for any possible issues with the representation and/or use of the data.
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
-}
-\dontrun{
-# If you haven't already:
-# Add the following to your .Rprofile (and restart):
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
-# See `vignette(\"better\")`
-}
-
+NULL
 library(tidyverse)
+}
 
-# GBD functions by default read data from `gbd`. See `vignette(\"better\")`
-gbd <- gbd_read()
-
-nudge_to_behavior_d() \%>\%
+nudge_to_behavior_d("information") \%>\%
   behavior_d_to_pct
 }

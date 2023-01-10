@@ -1,0 +1,239 @@
+---
+title: "The Global Burden of Disease dataset"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{gbd}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# Set all better options to NULL
+for (i in stringr::str_subset(names(options()),"better\\.")) {
+  print(i)
+  print(.Options[[i]])
+  .Options[[i]] <- NULL
+  print(.Options[[i]])
+}
+options(
+  rmarkdown.html_vignette.check_title = FALSE,
+  better.gbd_path = NULL#"/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data"
+  )
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+#devtools::build_rmd("vignettes/gbd.Rmd")
+```
+
+```{r, include = FALSE}
+library(better)
+library(tidyverse)
+# So that the once-per-session messages are gone:
+nudge("information") %>% 
+  disease("cardiovascular diseases")
+```
+
+<!-- ORIGINAL -->
+
+## Background
+
+To make data-driven guesstimates, `better` uses the [Global Burden of Disease (GBD) dataset](https://www.healthdata.org/gbd/2019), an incredibly rich dataset on the impact of a long list of diseases. 
+
+## Terms of use, license and citation
+
+The GBD dataset is created and maintained by the [Institute for Health Metrics and Evaluation](https://www.healthdata.org/) at the University of Washington. The dataset is owned by the University of Washington. The `better` package uses the dataset in accordance with the [IHME free-of-charge non-commercial user agreement]( https://www.healthdata.org/Data-tools-practices/data-practices/ihme-free-charge-non-commercial-user-agreement).
+
+Cite the data as follows: 
+
+Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from [https://vizhub.healthdata.org/gbd-results/](https://vizhub.healthdata.org/gbd-results/).
+
+<!-- end -->
+
+## Quick intro to the Global Burden of Disease dataset
+
+The GBD dataset contains data on death and disability, the diseases and injuries that cause them, and the risk factors for these causes.
+
+```{r}
+gbd
+gbd_variables()
+```
+
+The `measure` variable refers to the measure of death and/or disability.
+
+```{r}
+unique(gbd$measure)
+gbd_measures() %>%
+  select(measure, explain)
+```
+
+The `metric` variable refers to the measure of death and/or disability.
+
+```{r}
+unique(gbd$metric)
+gbd_measures() %>%
+  select(measure, number, percent, rate)
+```
+
+```{r}
+```
+
+
+The `cause` variable refers to the cause of death or disability.
+
+```{r}
+
+unique(gbd$cause)
+```
+
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+## Clean, save and load
+
+`better` has functions that will clean the GBD data and codebook, and save it as a `gbd_dataset` object into an `.rds` file. You can then easily read-in this file.
+
+```{r, eval = FALSE}
+library(tidyverse) # for convenient tibble printing and more
+library(better)
+gbd_save()
+gbd <- gbd_data()
+gbd
+```
+```{r, echo = FALSE}
+library(tidyverse)
+library(better)
+stopifnot(nchar(options()$better.gbd_path) > 0) # to
+#gbd_save() # takes too long
+warning()
+gbd <- gbd_data()
+gbd
+stopifnot(nrow(gbd) > 0)
+```
+
+```{r, echo = FALSE}
+# FOR TESTING
+# stopifnot(nrow(gbd) > 0)
+# get("gbd")
+# t1 <- function(x) {
+#   get("gbd")
+# }
+# t1()
+# stopifnot(nrow(t1()) > 0)
+# #stop(nrow(gbd))
+# gbd_filter(cause = "cardiovascular diseases") # many columns...
+```
+
+Note I called the returned list `gbd`. It contains data (`.$gbd_data`) and the codebook (`.$gbd_codebook`). It will be the main input for several `better` functions, like the function discussed in the next section. 
+
+## Get values from the GBD data
+
+The core of the package is the `better::gbd_*` family of functions, revolving around the Global Burden of Disease dataset. The GBD *dataset* consists of the GBD *data* and the GBD *codebook*. In `better`, this dataset is available as the object `gbd`. `gbd` is a dataframe with a "codebook" attribute. `better` also gives the GBD dataset its own class, namely, `better_gbd`. The most important reason is that `better_gbd` objects are printed in a special way. 
+
+`better::gbd_filter` gets values from the GBD data. 
+
+By default, it uses `gbd` (which should be the `gbd_dataset` object) for its `data` argument.
+
+```{r}
+gbd_filter(cause = "cardiovascular diseases") # many columns...
+```
+
+Let's run it without specifying any of the parameters, sticking to the defaults. 
+
+...
+
+In case you don't know, `rei` stands for *risks, etiologies and impairments* in GBD-speak, and `val` is the value.
+
+```{r}
+gbd_filter(rei = "behavioral risks")
+```
+
+Yay, we learned something! What we found here is that behavioral risks cause a population of 100,000 to lose `r gbd_filter(rei = "behavioral risks") %>% pull(val) %>% round %>% format(big.mark=",")` Disability-Adjusted Life Years (DALYs) in one year! That's a lot of life years. 
+
+```{r}
+gbd_filter(cause = "cardiovascular diseases", rei = NA, measure = c("deaths", "DALYs"))
+gbd_filter(cause = "cardiovascular diseases", rei = c("behavioral risks", "all risk factors"))
+```
+
+## Doing things differently
+
+If so far so good, you can ignore this section. It's about doing things a bit differently - but I don't recommend that.
+
+If you haven't set global options in `.Rprofile`, or in your current R session, you can still manually enter the path to your GBD folder.
+
+```{r, eval = FALSE}
+gbd_manual <- gbd_data("/Users/johnwilliam/datasets/Global Burden of Disease")
+```
+```{r, echo = FALSE, message = FALSE}
+path_gbd <- paste0(
+  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
+  "/Health Projects/Health Team/Public datasets on health",
+  "/Global Burden of Disease Study Data"
+)
+gbd_manual <- gbd_data(path_gbd)
+```
+
+The result is the same:
+
+```{r}
+gbd_filter(data = gbd_manual) %>% 
+  select(cause:measure)
+```
+
+The same goes for `better::gbd_save()`.
+
+## Try
+
+```{r}
+library(better)
+```
+
+By default, `gbd_filter()` sets the `location` parameter to `"Global"`. 
+
+```{r}
+gbd_filter("diabetes mellitus")
+gbd_filter("diabetes mellitus")$location
+```
+
+```{r}
+options(
+  better.location = "United States of America"
+)
+gbd_filter("diabetes mellitus")
+gbd_filter("diabetes mellitus")$location
+```
+
+## Beyond the starter dataset
+
+To learn more about how `better` uses GBD data in it's estimates, run `better_vignette(gbd)` to access the pre-installed HTML vignette. 
+
+```{r, eval = FALSE}
+library(better)
+?better_vignette
+better_vignette("dataset-extension")
+```
+
+Why not just have all of that info in this regular vignette here? Well, the vignette requires some setup (e.g., downloading extra GBD data). But regular vignettes are built from R code at the time of installation, and thus require everything to already be set up correctly. A pre-installed HTML is more forgiving. 
+

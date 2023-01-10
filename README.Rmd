@@ -6,8 +6,15 @@ output: github_document
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
+# Set all better options to NULL
+for (i in stringr::str_subset(names(options()),"better\\.")) {
+  print(i)
+  print(.Options[[i]])
+  .Options[[i]] <- NULL
+  print(.Options[[i]])
+}
 options(
-  better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data"
+  better.gbd_path = NULL #"/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data"
   )
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -19,12 +26,11 @@ knitr::opts_chunk$set(
 
 # better
 
-<!-- badges: start -->
-<!-- badges: end -->
+IMPORTANT: THIS PACKAGE IS UNDER DEVELOPMENT. IT'S AVAILABLE HERE FOR DEVELOPMENT AND TESTING PURPOSES ONLY.
 
-IMPORTANT: THIS PACKAGE IS STILL UNDER DEVELOPMENT. IT'S NOT YET INTENDED FOR USE. IT'S HERE FOR DEVELOPMENT PURPOSES ONLY.
+<!-- COPY from better.rmd -->
 
-The goal of better is to make the world a better place through impact evaluation.
+The `better` package helps you guesstimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. With `better` guesstimates, you can make the world a `better` place! In addition to guesstimating effect sizes, `better` also helps you guesstimate sample sizes for properly powered studies on health nudges. Finally, `better` also gives guesstimates of how much money you would save in terms of health care.
 
 ## Installation
 
@@ -32,139 +38,109 @@ You can install the development version of better from [GitHub](https://github.c
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("janlindemans/better")
+devtools::install_github("janlindemans/better", build_vignettes = TRUE)
 ```
-
-## Set up
-
-<!-- COPY from better vignette: edit original there -->
-
-`better` has several functions that rely on data from the Global Burden of Disease study (GBD). This requires some setup.
-
-### Download Global Burden of Disease codebook and data
-
-Download the **GBD codebook** from the website of the Institute for Health Metrics and Evaluation (IHME) by clicking [here](
-https://www.healthdata.org/sites/default/files/files/Data_viz/GBD_2019_Data_Tools_Guide.zip). 
-
-Save the downloaded folder `IHME_GBD_2019_CODEBOOK` into a root folder in which you'll later also save GBD data. Let's call this root folder the *GBD folder*. You can create the GBD folder anywhere and name it whatever you like. Your GBD folder could be something like: `Users/johnwilliam/datasets/Global Burden of Disease`, with the codebook folder `Users/johnwilliam/datasets/Global Burden of Disease/IHME_GBD_2019_CODEBOOK`.
-
-Download your first **GBD data** from the Global Health Data Exchange website. Click [here](https://vizhub.healthdata.org/gbd-results/) to go to the website. 
-
-You'll need to create an account first. Click `Sign in`, then `Register`, etc.  
-
-Then go back to the [GBD Results page](https://vizhub.healthdata.org/gbd-results/). It's a huge database, so you can't download everything. 
-
-Start by downloading a basic dataset on *causes of death*, with the following parameters in the drop-down menus on the page:
-
-* `GBD Estimate`: Keep that one as is, so `Cause of death or injury`.
-* `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs` from the drop-down.
-* `Metric`: Fine as is, keep all three.
-* `Cause`: Keep `All causes`, and add `Cardiovascular diseases` from the drop-down, under `Non-communicable diseases`, and `Diabetes and kidney diseases`.
-* `Location`: Keep `Global`, and add `Low SDI`, `Middle SDI`, and `High SDI`, and `United States of America` (under `High-income North America`) and `Latin America and Caribbean` (below `Western Europe`).
-* `Ages`: Keep `All ages`, and add `Age-standardized`, `<20 years`, `20+ years`, `<70 years` and `70+ years`.
-* `Sex`: Keep `Both`, and add `Male` and `Female`.
-* `Year`: Keep `2019`, and add `2009`.
-
-Then click `Download`, and, for `Include ID Values`, you can keep `Both`. When it says "You can also monitor progress `here`", click `here` and then `Download`. 
-
-Then go back by clicking the left arrow on top of the page, to the left of `Data Download`. It will take you back to the Search page, where you just entered all these parameters. It will remember all these parameters, so it's best you really go back like I described. 
-
-Now download the same dataset, but with the following parameters:
-
-* `Measure`: Select `YLLs`, `Prevalence`, and `Incidence`.
-
-After you did that, go back and download a dataset on *risk factors*:
-
-* `GBD Estimate`: Select `Risk factor`. 
-* `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs`. 
-* `Metric`: Fine as is, keep all three.
-* `Risk`: Keep `All risk factors`, add `behavioral risks`, `Tobacco` and `Dietary risks`.
-* `Cause` until `Year`: Keep it all as is, if it remembered your selections from the dataset on causes of death (see above).
-
-After you did that, go back, and download the same dataset but with `Measure` being `YLLs`.
-
-After you did that, go back and download a dataset on *summary exposure values*:
-* `GBD Estimate`: Select `Summary exposure values (SEV)`.
-* For `Measure` and `Metric`, you won't have any choice.
-* `Risk` until `Year`: Keep it all as is, if it remembered your selections from earlier on (see above).
-
-After unzipping, the downloaded data folder should have a name similar to this: `IHME-GBD_2019_DATA-64c5a7b3-1`. Store this data folder anywhere in (a subfolder of) your GBD folder. For instance: `Users/johnwilliam/datasets/Global Burden of Disease/Raw GBD data/IHME-GBD_2019_DATA-64c5a7b3-1`. You'll do the same for future data downloads. Just don't change the names of the data files, and codebook files for that matter, because `better` searches for them using these names.
-
-### Set global option in your `.Rprofile` file
-
-Enter the path of your GBD folder (e.g., `Users/johnwilliam/datasets/Global Burden of Disease`) as the default GBD path via global options set in your `.Rprofile` file. It will be used by several `better` functions. It is not required, since you can also set global options manually in each session, or even set the path manually for each function call (see below). But it's easier to take care of this once and for all in `.Rprofile`. 
-
-It will look like this:
-
-```{r, eval = FALSE}
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease")
-```
-
-If you haven't used `.Rprofile` before, it's a hidden file located somewhere like here: `Users/johnwilliam/.Rprofile`. Learn more about `.Rprofile` on [the Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
 
 ## Usage
 
 <!-- COPY from better vignette: edit original there -->
 
-The main purpose of `better` is to help you better guestimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. 
 
-Imagine you are designing a public health campaign. You are thinking about focusing on preventing cardiovascular diseases, and you are considering making information about healthy lifestyle more accessible. What effects can you expect from a campaign like that? This is how we would do it with `better`.
+## An example: A diet-related nudge for diabetics
 
-First, we look up the effect of an information nudge on health behavior.
+<!-- ORIGINAL HERE - COPY PASTE it to elsewhere -->
 
-```{r}
-library(tidyverse)
+```{r, include = FALSE}
 library(better)
-nudge_to_behavior_d(nudge = "information", behavior = "health") 
+library(tidyverse)
+gbd_filter()
+#stop("gbd rows: ",nrow(gbd))
+# So that the once-per-session messages are gone:
+nudge("information") %>% 
+  disease("diabetes mellitus")
 ```
 
+The main purpose of `better` is to help you better guesstimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. 
 
-This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior_d(nudge = "information", behavior = "health")$value`.
+Imagine you are designing a public health campaign. You are thinking about focusing on diabetics, and you are considering making information about healthy foods more accessible. What effects can you expect from a campaign like that? 
 
-Second, as an intermediate step, we translate Cohen's *d* into a percentage point difference.
+This is how we would make a guesstimate with `better`. Let's load it, and let's also load `tidyverse`, so we can use pipes and other tidy constructions.
 
 ```{r}
-nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
-  behavior_d_to_pct
+library(better)
+library(tidyverse)
+
+nudge("information", behavior = "food") %>% 
+  disease("diabetes mellitus") %>%
+  describe
 ```
 
-This gives us a decrease of `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% {round(abs(.$value),1)}` percentage points.
+Note that "DALYs" are *disability-adjusted life years*, a measure of overall disease burden, expressed as the number of years lost due to disease, disability or early death. The output above shows DALYs *saved* by the nudge, that is, the number of years *saved* due to *decreased* disease, disability and death.
 
-Finally, we can get our guestimate of the effect:
+As for the code: We basically told `nudge()` what kind of nudge we are envisioning, `"information"`, and what kind of behavior we are targeting: `"food"`-related behavior. We piped the result into `disease()` and told it what disease we are targeting: `"diabetes mellitus"`. Finally, `describe()` simplified the output to a brief description of the guesstimate, which is what you saw.
+
+So, we got our guesstimate in terms of DALYs saved. There's many other measures we can get estimates for. Let's see how many *years lived with disability* or "YLDs" our nudge would save:
 
 ```{r}
-nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
-  behavior_d_to_pct %>%
-  behavior_pct_to_disease("cardiovascular diseases")
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  describe
 ```
+
+The reason why I picked YLDs is because it allows us to guesstimate the cost of healthcare saved by the nudge. We do that as follows, with `cost()`:
 
 ```{r}
-gbd_cb <- gbd_codebook()
-nudge_cb <- nudge_codebook()
-nudge_cb$nudge
-nudge_cb$behavior
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  cost %>%
+  describe
 ```
 
-We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% behavior_pct_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
+Note that cost calculation is still a feature in development: for now it doesn't yet distinguish between the costs of different diseases. Run `?cost` to read more. 
 
-Note that this is based on the following statistic:
+Once we have the cost savings, we can also guesstimate the *net* savings in cost, that is, the savings from reduce healthcare costs minus the cost of the nudge, of running the campaign. We use the `net()` function:
 
 ```{r}
-gbd_describe(cause = "cardiovascular diseases")
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  cost %>%
+  net %>%
+  describe
 ```
 
-Let's see, what if we would shift the focus of our intervention to diabetes and kidney diseases?
+Next, say you are in charge of a campaign at an insurance company with 350,000 members. You can also calculate the net savings for 350,000 members, with the `per()` function:
 
 ```{r}
-nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
-  behavior_d_to_pct %>%
-  behavior_pct_to_disease("diabetes and kidney diseases")
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  cost %>%
+  net %>%
+  per(350000) %>%
+  describe
 ```
 
-What if we tried a structural nudge?
+Finally, say you are considering running an experiment with your members, to see if your nudge has a positive impact. You can do quick power calculations with `sample_size()`. Here is how to do a power calculation for an experiment that wants to detect an impact on food-related behaviors.
 
 ```{r}
-nudge_to_behavior_d(nudge = "structure", behavior = "health") %>%
-  behavior_d_to_pct %>%
-  behavior_pct_to_disease("diabetes and kidney diseases")
+nudge("information", behavior = "food") %>%
+  describe
+nudge("information", behavior = "food") %>%
+  sample_size
 ```
+
+Here is how to do a power calculation for a much more ambitious experiment that wants to detect on impact on saving lives (preventing deaths):
+
+```{r}
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "deaths") %>%
+  describe
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "deaths") %>%
+  sample_size
+```
+
+The low number of yearly deaths means you'll need a huge sample size! Better just look at behavior change!
+
+Alright, that's a quick overview of what `better` can do for you!
+
+<!-- END COPY -->

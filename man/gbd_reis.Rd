@@ -10,14 +10,14 @@ gbd_reis(...)
 \item{...}{Which reis you want a codebook for, string.}
 }
 \value{
-Codebook, dataframe
+Codebook, data frame
 }
 \description{
 Get codebook for GBD reis
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+NULL
 }
 gbd_reis("behavioral risks")
 }

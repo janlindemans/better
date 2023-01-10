@@ -1,5 +1,5 @@
 ---
-title: "Introduction to better"
+title: "Introduction to the `better` package"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{better}
@@ -7,124 +7,161 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-# TODO ???
-# allow gbd_filter to take df as first argument
-# print_nr: ALLOW MANUAL COMMA INSERTION
 
+```{r, include = FALSE}
+# Set all better options to NULL
+for (i in stringr::str_subset(names(options()),"better\\.")) {
+  print(i)
+  print(.Options[[i]])
+  .Options[[i]] <- NULL
+  print(.Options[[i]])
+}
 options(
-  rmarkdown.html_vignette.check_title = FALSE,
-  better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data"
+  rmarkdown.html_vignette.check_title = FALSE
+  # ,
+  # better.gbd_path = NULL #"/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data"
   )
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 8, fig.asp = 0.618, # https://r4ds.had.co.nz/graphics-for-communication.html
+  out.width = "90%", fig.align = "center"
 )
 #devtools::build_rmd("vignettes/gbd.Rmd")
 ```
 
 ## Introduction
 
-This package helps you to better guesstimate the effect of health nudges, that is, of behavioral interventions targeted at health behaviors. And make the world a *better* place! 
+<!-- ORIGINAL description -->
 
-## Set up
+The `better` package helps you guesstimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. With `better` guesstimates, you can make the world a `better` place! In addition to guesstimating effect sizes, `better` also helps you guesstimate sample sizes for properly powered studies on health nudges. Finally, `better` also gives guesstimates of how much money you would save in terms of health care.
 
-*If you followed the instructions when installing, you should have already set things up. Just in case you haven't yet, I'll repeat the set-up instructions here.*
+<!-- end description -->
 
-`better` has several functions that rely on data from the Global Burden of Disease study (GBD). This requires some setup.
+To make data-driven guesstimates, `better` uses the [Global Burden of Disease (GBD) dataset](https://www.healthdata.org/gbd/2019), an incredibly rich dataset created and maintained by the [Institute for Health Metrics and Evaluation](https://www.healthdata.org/) at the University of Washington, and property of the University of Washington. 
 
-### Download Global Burden of Disease codebook and data
+## An example: A diet-related nudge for diabetics
 
-Download the **GBD codebook** from the website of the Institute for Health Metrics and Evaluation (IHME) by clicking [here](
-https://www.healthdata.org/sites/default/files/files/Data_viz/GBD_2019_Data_Tools_Guide.zip). 
-
-Save the downloaded folder `IHME_GBD_2019_CODEBOOK` into a root folder in which you'll later also save GBD data. Let's call this root folder the *GBD folder*. You can create the GBD folder anywhere and name it whatever you like. Your GBD folder could be something like: `Users/johnwilliam/datasets/Global Burden of Disease`, with the codebook folder `Users/johnwilliam/datasets/Global Burden of Disease/IHME_GBD_2019_CODEBOOK`.
-
-Download your first **GBD data** from the Global Health Data Exchange website. Click [here](https://vizhub.healthdata.org/gbd-results/) to go to the website. 
-
-You'll need to create an account first. Click `Sign in`, then `Register`, etc.  
-
-Then go back to the [GBD Results page](https://vizhub.healthdata.org/gbd-results/). It's a huge database, so you can't download everything. 
-
-Start by downloading a basic dataset on *causes of death*, with the following parameters in the drop-down menus on the page:
-
-* `GBD Estimate`: Keep that one as is, so `Cause of death or injury`.
-* `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs` from the drop-down.
-* `Metric`: Fine as is, keep all three.
-* `Cause`: Keep `All causes`, and add `Cardiovascular diseases` from the drop-down, under `Non-communicable diseases`, and `Diabetes and kidney diseases`.
-* `Location`: Keep `Global`, and add `Low SDI`, `Middle SDI`, and `High SDI`, and `United States of America` (under `High-income North America`) and `Latin America and Caribbean` (below `Western Europe`).
-* `Ages`: Keep `All ages`, and add `Age-standardized`, `<20 years`, `20+ years`, `<70 years` and `70+ years`.
-* `Sex`: Keep `Both`, and add `Male` and `Female`.
-* `Year`: Keep `2019`, and add `2009`.
-
-Then click `Download`, and, for `Include ID Values`, you can keep `Both`. When it says "You can also monitor progress `here`", click `here` and then `Download`. 
-
-Then go back by clicking the left arrow on top of the page, to the left of `Data Download`. It will take you back to the Search page, where you just entered all these parameters. It will remember all these parameters, so it's best you really go back like I described. 
-
-Now download the same dataset, but with the following parameters:
-
-* `Measure`: Select `YLLs`, `Prevalence`, and `Incidence`.
-
-After you did that, go back and download a dataset on *risk factors*:
-
-* `GBD Estimate`: Select `Risk factor`. 
-* `Measure`: Keep `Deaths` and `DALYs`, and add `YLDs`. 
-* `Metric`: Fine as is, keep all three.
-* `Risk`: Keep `All risk factors`, add `behavioral risks`, `Tobacco` and `Dietary risks`.
-* `Cause` until `Year`: Keep it all as is, if it remembered your selections from the dataset on causes of death (see above).
-
-After you did that, go back, and download the same dataset but with `Measure` being `YLLs`.
-
-After you did that, go back and download a dataset on *summary exposure values*:
-* `GBD Estimate`: Select `Summary exposure values (SEV)`.
-* For `Measure` and `Metric`, you won't have any choice.
-* `Risk` until `Year`: Keep it all as is, if it remembered your selections from earlier on (see above).
-
-After unzipping, the downloaded data folder should have a name similar to this: `IHME-GBD_2019_DATA-64c5a7b3-1`. Store this data folder anywhere in (a subfolder of) your GBD folder. For instance: `Users/johnwilliam/datasets/Global Burden of Disease/Raw GBD data/IHME-GBD_2019_DATA-64c5a7b3-1`. You'll do the same for future data downloads. Just don't change the names of the data files, and codebook files for that matter, because `better` searches for them using these names.
-
-### Set global option in your `.Rprofile` file
-
-Enter the path of your GBD folder (e.g., `Users/yourname/datasets/Global Burden of Disease`) as the default GBD path via global options set in your `.Rprofile` file. It will be used by several `better` functions. It is not required, since you can also set global options manually in each session, or even set the path manually for each function call (see below). But it's easier to take care of this once and for all in `.Rprofile`. 
-
-It will look like this:
-
-```{r, eval = FALSE}
-options(better.gbd_path = "/Users/yourname/datasets/Global Burden of Disease")
-```
-
-If you haven't used `.Rprofile` before, it's a hidden file with code that R runs at startup. It should be located in your home/user folder (e.g., `Users/yourname/.Rprofile`). Learn more about `.Rprofile` on the [Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
-
-## Quick intro to effects
+<!-- ORIGINAL HERE - COPY PASTE it to elsewhere -->
 
 ```{r, include = FALSE}
 library(better)
 library(tidyverse)
+gbd_filter()
+#stop("gbd rows: ",nrow(gbd))
 # So that the once-per-session messages are gone:
 nudge("information") %>% 
-  disease("cardiovascular diseases")
+  disease("diabetes mellitus")
 ```
 
 The main purpose of `better` is to help you better guesstimate the effect of health nudges, that is, behavioral interventions targeted at health behaviors. 
 
-Imagine you are designing a public health campaign. You are thinking about focusing on preventing cardiovascular diseases, and you are considering making information about healthy lifestyle more accessible. What effects can you expect from a campaign like that? 
+Imagine you are designing a public health campaign. You are thinking about focusing on diabetics, and you are considering making information about healthy foods more accessible. What effects can you expect from a campaign like that? 
 
 This is how we would make a guesstimate with `better`. Let's load it, and let's also load `tidyverse`, so we can use pipes and other tidy constructions.
 
 ```{r}
 library(better)
 library(tidyverse)
+
+nudge("information", behavior = "food") %>% 
+  disease("diabetes mellitus") %>%
+  describe
 ```
 
-Then, we tell `better::nudge` what kind of nudge we are envisioning: in our case `"information"`. We pipe the result into `better::disease` and tell it what disease we are targeting: `"cardiovascular diseases"`.
+Note that "DALYs" are *disability-adjusted life years*, a measure of overall disease burden, expressed as the number of years lost due to disease, disability or early death. The output above shows DALYs *saved* by the nudge, that is, the number of years *saved* due to *decreased* disease, disability and death.
+
+As for the code: We basically told `nudge()` what kind of nudge we are envisioning, `"information"`, and what kind of behavior we are targeting: `"food"`-related behavior. We piped the result into `disease()` and told it what disease we are targeting: `"diabetes mellitus"`. Finally, `describe()` simplified the output to a brief description of the guesstimate, which is what you saw.
+
+What if we don't really know what we want to focus on? We can compare effects:
 
 ```{r}
-nudge("information") %>% 
-  disease("cardiovascular diseases")
+compare_effects() # location = "United States of America"
 ```
 
-You get some rich output, but the main thing is the number below "Value": `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)} %>% format(big.mark = ",")`. What does it mean? If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge("information") %>% disease("cardiovascular diseases") %>% {round(.$value)}` years. Note that disability adjusted life years (DALYs) refers to healthy life years - life years without disease or disability.
+So, we got our guesstimate in terms of DALYs saved. There's many other measures we can get estimates for. Let's see how many *years lived with disability* or "YLDs" our nudge would save:
 
-We can get the full explanation of the guesstimate with `better::explanation`:
+```{r}
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  describe
+```
+
+The reason why I picked YLDs is because it allows us to guesstimate the cost of healthcare saved by the nudge. We do that as follows, with `cost()`:
+
+```{r}
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  cost %>%
+  describe
+```
+
+Note that cost calculation is still a feature in development: for now it doesn't yet distinguish between the costs of different diseases. Run `?cost` to read more. 
+
+Once we have the cost savings, we can also guesstimate the *net* savings in cost, that is, the savings from reduce healthcare costs minus the cost of the nudge, of running the campaign. We use the `net()` function:
+
+```{r}
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  cost %>%
+  net %>%
+  describe
+```
+
+Next, say you are in charge of a campaign at an insurance company with 350,000 members. You can also calculate the net savings for 350,000 members, with the `per()` function:
+
+```{r}
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "YLDs") %>%
+  cost %>%
+  net %>%
+  per(350000) %>%
+  describe
+```
+
+Finally, say you are considering running an experiment with your members, to see if your nudge has a positive impact. You can do quick power calculations with `sample_size()`. Here is how to do a power calculation for an experiment that wants to detect an impact on food-related behaviors.
+
+```{r}
+nudge("information", behavior = "food") %>%
+  describe
+nudge("information", behavior = "food") %>%
+  sample_size
+```
+
+Here is how to do a power calculation for a much more ambitious experiment that wants to detect on impact on saving lives (preventing deaths):
+
+```{r}
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "deaths") %>%
+  describe
+nudge("information", behavior = "food") %>%
+  disease("diabetes mellitus", measure = "deaths") %>%
+  sample_size
+```
+
+The low number of yearly deaths means you'll need a huge sample size! Better just look at behavior change!
+
+Alright, that's a quick overview of what `better` can do for you!
+
+## Complicate things
+
+We could have picked another disease: 
+```{r}
+nudge("information", behavior = "food") %>% 
+  disease("diabetes mellitus") %>%
+  describe
+```
+
+
+You get some rich output, but the main thing is the number below "Value": `r nudge("information", behavior = "food") %>% disease("diabetes mellitus") %>% {round(.$value)} %>% format(big.mark = ",")` DALYs. What does it mean? If we're going to roll out an information nudge in 100,000 people, targeted at diabetes mellitus, we're expected to boost disability adjusted life years by about `r nudge("information", behavior = "food") %>% disease("diabetes mellitus") %>% {round(.$value)} %>% format(big.mark = ",")` years. Note that DALYs (disability adjusted life years) refers to healthy life years - life years without disease or disability.
+
+Now, to get the estimate, we called two functions: `nudge()` and `disease()`. That's because we first guesstimate the effect of the nudge on behavior, and then we guesstimate the effect of behavior on disease (DALYs). You can check out the effect of the nudge on behavior by only calling the first function:
+
+```{r}
+nudge("information")
+```
+
+The philosophy of `better` is to create pipes of guesstimate functions, like `nudge()` and `disease()`, to get a more complicated guesstimate consisting of multiple steps. We can get the full explanation of the guesstimate with `better::explanation()`:
 
 ```{r}
 nudge("information") %>% 
@@ -132,11 +169,13 @@ nudge("information") %>%
   explanation
 ```
 
-Let's see what happens if we would shift the focus of our intervention to diabetes and kidney diseases. To simplify the output, I use `better::effect_only`. It prints only the effect, leaving out the parameters and explanation.
+This output also shows you that there was an intermediate step in the calculation.
+
+Let's see what happens if we would shift the focus of our intervention to diabetes mellitus. To simplify the output, I use `better::effect_only`. It prints only the effect, leaving out the parameters and explanation.
 
 ```{r}
 nudge("information") %>%
-  disease("diabetes and kidney diseases") %>%
+  disease("diabetes mellitus") %>%
   effect_only
 ```
 
@@ -144,7 +183,7 @@ What if we tried a structural nudge?
 
 ```{r}
 nudge("structure") %>%
-  disease("diabetes and kidney diseases") %>%
+  disease("diabetes mellitus") %>%
   effect_only
 ```
 
@@ -152,9 +191,46 @@ What if we wanted to see the impact on deaths?
 
 ```{r}
 nudge("structure") %>%
-  disease("diabetes and kidney diseases", measure = "deaths") %>%
+  disease("diabetes mellitus", measure = "deaths") %>%
   effect_only
 ```
+
+You can also get quick power calculations. Say you want to run an experiment, testing the information nudge, with two conditions: a treatment, and a control. You hypothesize the nudge will decrease risky behaviors. How many observations do you need in each condition?
+
+```{r}
+nudge("information") %>% 
+  sample_size
+```
+```{r, include = FALSE}
+pcalc <- nudge("information") %>% 
+  sample_size
+```
+
+So, you need about `r round(pcalc$n) %>% format(big.mark = ",")` observations per condition. You may recognize this kind of output. It's the output of `pwr.t.test()` from the `pwr` package, because `sample_size()` wraps that function.
+
+Alternatively, you may want to be sufficiently powered to discern an impact on health - say on the death rate. 
+
+```{r, include = FALSE}
+nudge("information") %>%
+  disease("cardiovascular diseases", measure = "deaths") %>%
+  sample_size
+```
+
+Of course you need a much larger sample to be able to detect a difference in mortality.
+
+What if we don't really know what we want to focus on? We can compare effects:
+
+```{r}
+compare_effects(location = "United States of America", cause = "diabetes mellitus")
+```
+
+You can also run it without any constraints:
+
+```{r}
+compare_effects()
+```
+
+<!-- END ORIGINAL -->
 
 ## Input your own effect size
 
@@ -162,6 +238,25 @@ Imagine you are still designing that public health campaign, on preventing cardi
 
 ```{r}
 behavior_d(.56) %>%
+  disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+Rather than manually entering one effect size, you may also want to create your own `better`-style functions. Here's an example:
+
+```{r}
+d_categorical <- function(size) {
+  if (size == "small") {
+    d <- .2
+  } else if (size == "medium") {
+    d <- .5
+  } else if (size == "large") {
+    d <- .8
+  }
+  behavior_d(d, d, d)
+}
+d_categorical("large")
+d_categorical("large") %>%
   disease("cardiovascular diseases") %>%
   effect_only
 ```
@@ -195,34 +290,75 @@ behavior_pct(11.4) %>%
 
 ## Breaking things up
 
-Here is the full reasoning:
-
-First, we look up the effect of an information nudge on health behavior.
+Earlier on we looked at this very simple example of an impact guesstimate:
 
 ```{r}
-nudge_to_behavior_d(nudge = "information", behavior = "health")
+nudge("information") %>% 
+  disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+Here is the full reasoning behind it:
+
+First, we look up the effect of an information nudge on health behavior. Note that, rather than `nudge()`, I'm using `nudge_to_behavior_d()` here. It's an alias with different defaults. But it's more explicit, and that's what we want now.
+
+```{r}
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  effect_only
 ```
 
 This gives us a Cohen's *d*, a standardized effect size for the health information nudge, namely, *d* = `r nudge_to_behavior_d(nudge = "information", behavior = "health")$value`.
 
-Second, as an intermediate step, we translate Cohen's *d* into a percentage difference, because that's how we can link it to the Global Burden of Disease dataset.
+Second, we translate Cohen's *d* into an odds ratio.
 
 ```{r}
-nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
-  behavior_d_to_pct
+step2 <- nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  d_to_OR %>%
+  effect_only
 ```
 
-This gives us a decrease of `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% {round(abs(.$value),1)}` percentage points.
+Let's look at the explanation:
+
+```{r}
+step2 %>%
+  explanation(full = FALSE)
+```
+
+Third, we convert the odds ratio into a percentage difference, because that's how we can link it to the Global Burden of Disease dataset.
+
+```{r}
+step3 <- nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  d_to_OR %>%
+  behavior_OR_to_pct %>%
+  effect_only
+```
+
+Let's look at the explanation:
+
+```{r}
+step3 %>%
+  explanation(full = FALSE)
+```
 
 Finally, we can get our guesstimate of the effect:
 
 ```{r}
-nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
-  behavior_d_to_pct %>%
-  behavior_pct_to_disease("cardiovascular diseases")
+step4 <- nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  d_to_OR %>%
+  behavior_OR_to_pct %>%
+  behavior_pct_to_disease("cardiovascular diseases") %>%
+  effect_only
 ```
 
-We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% behavior_pct_to_disease("cardiovascular diseases") %>% {round(.$value)}` years! That's not bad. 
+Let's look at the explanation:
+
+```{r}
+step4 %>%
+  explanation(full = FALSE)
+```
+
+
+We learned something! If we're going to roll out an information nudge in 100,000 people, targeted at cardiovascular diseases, we're expected to boost disability adjusted life years by about `r step4 %>% {round(.$value)}` years! That's not bad. 
 
 Note that this is based on the following statistic:
 
@@ -240,179 +376,149 @@ nudge_cb$nudge
 nudge_cb$behavior
 ```
 
+## Using different guesstimate methods
 
-## Quick intro to the Global Burden of Disease dataset
-
-The GBD dataset contains data on death and disability, the diseases and injuries that cause them, and the risk factors for these causes.
-
-```{r}
-gbd
-gbd_variables()
-```
-
-The `measure` variable refers to the measure of death and/or disability.
+To convert the Cohen's *d* into a percentage decrease, by default, `disease()` uses the method from Hasselblad and Hedges (1995) to convert *d* into an odds ratio:
 
 ```{r}
-unique(gbd$measure)
-gbd_measures() %>%
-  select(measure, explain)
+nudge("information") %>% 
+  disease("cardiovascular diseases") %>%
+  effect_only
+# same:
+nudge("information") %>% 
+  disease("cardiovascular diseases", method = "Hasselblad and Hedges") %>%
+  effect_only
 ```
 
-The `metric` variable refers to the measure of death and/or disability.
+We can also use an alternative method, based on the fact that Cohen's *d* is a difference *in standard deviations*. 
 
 ```{r}
-unique(gbd$metric)
-gbd_measures() %>%
-  select(measure, number, percent, rate)
+nudge("information") %>% 
+  disease("cardiovascular diseases", method = "standard deviations") %>%
+  effect_only
+```
+
+Let's walk through what happens behind the scene when `disease(method = "standard deviations)` does it's magic. The input is of course again a Cohen's *d*:
+
+```{r}
+nudge("information") %>%
+  effect_only
+```
+
+Then, as an intermediate step, it translates Cohen's *d* into a percentage difference, because that's how we can link it to the Global Burden of Disease dataset.
+
+```{r}
+eff <- nudge("information") %>%
+  behavior_d_to_pct %>%
+  effect_only 
+```
+This gives us a decrease of `r nudge_to_behavior_d(nudge = "information", behavior = "health") %>% behavior_d_to_pct %>% {round(abs(.$value)*100,1)}` percent. Let's look at the explanation:
+
+```{r}
+eff %>%
+  explanation(full = FALSE)
+```
+
+The last step is the same. We can get our guesstimate of the effect with `behavior_pct_to_disease()`:
+
+```{r}
+nudge_to_behavior_d(nudge = "information", behavior = "health") %>%
+  behavior_d_to_pct %>%
+  behavior_pct_to_disease("cardiovascular diseases") %>%
+  effect_only
+```
+
+## Effect of nudges
+
+Get the effect size for behavioral interventions aka *nudges* with `better::nudge_to_behavior_d`. This returns an object of the `better_effect` class. It's basically a list containing the effect size, the confidence interval, and some other metadata. It's printed in a useful way.
+
+```{r}
+eff <- nudge_to_behavior_d()
+eff
+class(eff)
+str(eff)
+eff$value
+```
+
+Get the full explanation with `better::explanation`.
+
+```{r}
+eff %>%
+  explanation
+```
+
+The estimate above averaged over all categories of behaviors and nudges. Let's now look at the impact for specific categories of behaviors and nudges:
+
+```{r}
+nudge_to_behavior_d(behavior = "health")
+nudge_to_behavior_d(behavior = "food")
+nudge_to_behavior_d(nudge = "assistance")
+nudge_to_behavior_d(nudge = "structure")
+nudge_to_behavior_d(behavior = "food", nudge = "structure")
+nudge_to_behavior_d(behavior = "health", nudge = "information")
+```
+
+You can also access the dataset of Cohen's *d*'s.
+
+```{r}
+nudge_data()
+```
+
+Proportions
+
+```{r}
+nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+  print %>%
+  behavior_d_to_pct(cause = "cardiovascular diseases") 
+nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
+  behavior_d_to_pct(cause = "cardiovascular diseases") %>% 
+  explanation
+```
+
+The estimates of the proportions are based on the GBD data on summary exposure values, which you can access like this:
+
+```{r}
+gbd_filter(measure = "summary exposure value")
+```
+
+
+```{r}
+# nudge_to_behavior_d("information") %>% print %>%
+#   behavior_d_to_pct %>% print %>%
+#   behavior_pct_to_disease("cardiovascular disease")
+# 
+# nudge("information") %>%
+#   disease("cardiovascular disease") %>%
+#   explanation
 ```
 
 ```{r}
-```
 
-
-The `cause` variable refers to the cause of death or disability.
-
-```{r}
-
-unique(gbd$cause)
-```
-
-
-```{r}
 ```
 
 ```{r}
+
 ```
 
 ```{r}
+
 ```
 
 ```{r}
+
 ```
 
 ```{r}
-```
 
-```{r}
-```
-
-```{r}
-```
-
-```{r}
-```
-
-## Clean, save and load
-
-`better` has functions that will clean the GBD data and codebook, and save it as a `gbd_dataset` object into an `.rds` file. You can then easily read-in this file.
-
-```{r, eval = FALSE}
-library(tidyverse) # for convenient tibble printing and more
-library(better)
-gbd_save()
-gbd <- gbd_read()
-gbd
-```
-```{r, echo = FALSE}
-library(tidyverse)
-library(better)
-stopifnot(nchar(options()$better.gbd_path) > 0) # to
-#gbd_save() # takes too long
-warning()
-gbd <- gbd_read()
-gbd
-stopifnot(nrow(gbd) > 0)
-```
-
-```{r, echo = FALSE}
-# FOR TESTING
-# stopifnot(nrow(gbd) > 0)
-# get("gbd")
-# t1 <- function(x) {
-#   get("gbd")
-# }
-# t1()
-# stopifnot(nrow(t1()) > 0)
-# #stop(nrow(gbd))
-# gbd_filter(cause = "cardiovascular diseases") # many columns...
-```
-
-Note I called the returned list `gbd`. It contains data (`.$gbd_data`) and the codebook (`.$gbd_codebook`). It will be the main input for several `better` functions, like the function discussed in the next section. 
-
-## Get values from the GBD data
-
-The core of the package is the `better::gbd_*` family of functions, revolving around the Global Burden of Disease dataset. The GBD *dataset* consists of the GBD *data* and the GBD *codebook*. In `better`, this dataset is available as the object `gbd`. `gbd` is a dataframe with a "codebook" attribute. `better` also gives the GBD dataset its own class, namely, `better_gbd`. The most important reason is that `better_gbd` objects are printed in a special way. 
-
-`better::gbd_filter` gets values from the GBD data. 
-
-By default, it uses `gbd` (which should be the `gbd_dataset` object) for its `data` argument.
-
-```{r}
-gbd_filter(cause = "cardiovascular diseases") # many columns...
-```
-
-Let's run it without specifying any of the parameters, sticking to the defaults. 
-
-...
-
-In case you don't know, `rei` stands for *risks, etiologies and impairments* in GBD-speak, and `val` is the value.
-
-```{r}
-gbd_filter(rei = "behavioral risks")
-```
-
-Yay, we learned something! What we found here is that behavioral risks cause a population of 100,000 to lose `r gbd %>% gbd_filter(rei = "behavioral risks") %>% pull(val) %>% round %>% format(big.mark=",")` Disability-Adjusted Life Years (DALYs) in one year! That's a lot of life years. 
-
-```{r}
-gbd_filter(cause = "cardiovascular diseases", rei = NA, measure = c("deaths", "DALYs"))
-gbd_filter(cause = "cardiovascular diseases", rei = c("behavioral risks", "all risk factors"))
-```
-
-## Doing things differently
-
-If so far so good, you can ignore this section. It's about doing things a bit differently - but I don't recommend that.
-
-If you haven't set global options in `.Rprofile`, or in your current R session, you can still manually enter the path to your GBD folder.
-
-```{r, eval = FALSE}
-gbd_manual <- gbd_read("/Users/johnwilliam/datasets/Global Burden of Disease")
-```
-```{r, echo = FALSE, message = FALSE}
-path_gbd <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
-  "/Global Burden of Disease Study Data"
-)
-gbd_manual <- gbd_read(path_gbd)
-```
-
-The result is the same:
-
-```{r}
-gbd_filter(data = gbd_manual) %>% 
-  select(cause:measure)
-```
-
-The same goes for `better::gbd_save()`.
-
-But there's little reason here to always explicitly feed these functions the path. Now, `better` allows a more implicit style in other places too, but there I don't recommend it. First, rather than `gbd <- better::gbd_read()`, you can simply write `better::gbd_read(load = TRUE)` or `better::gbd_load(load)`, and it will create `gbd` for you. Second, rather than `gbd %>% better::gbd_filter(rei = "behavioral risks")`, you can simply write `better::gbd_filter(rei = "behavioral risks")`, because by default `better::gbd_filter` looks for an object called `gbd`. But I don't recommend any of these implicit calls, because they are not clear about what's going on in your global environment.
-
-```{r}
-rm(gbd)
-exists("gbd")
-gbd_load()
-exists("gbd")
 ```
 
 ## Browse categories and download more data
 
 You can browse more causes and risk factors in the full dataset on the website. If you see anything of interest, you can go download the data. `better` has functions that help you browse the codebook for all available causes and risk factors. 
 
-Here's a browser for causes:
-
 ```{r, eval = FALSE, echo = FALSE}
 # for browsing, enter 2 and then q
-gbd_browse_cause()
+gbd_browse()
 # copy output on clipboard
 capture(cat(clipboard()),collapse="\n#> ")
 # de newlines at user input
@@ -502,17 +608,17 @@ gbd_browse_cause()
 #> [1] "Non-communicable diseases"
 ```
 
-And here's a similar browser for risk factors, etiologies, and impairments - called `rei` in GBD-speak:
+Now pick risk factors, etiologies, and impairments - called `rei` in GBD-speak - by entering `r`:
 
 ```{r, eval = FALSE, echo = FALSE}
 # for browsing, enter 2 and then q
-gbd_browse_rei()
+gbd_browse()
 # copy output on clipboard
 capture(cat(clipboard()),collapse="\n#> ")
 # de newlines at user input
 ```
 ```{r, eval = FALSE}
-gbd_browse_rei()
+gbd_browse()
 #> Category:
 #> 
 #> Data already downloaded for this parent category:
@@ -634,6 +740,577 @@ If you don't, you have to go download it. `better::gbd_download()` will open the
 gbd_download()
 ```
 
+You can also print tree diagrams of the causes and REIs, as follows:
+
+```{r, eval = FALSE}
+gbd_causes() %>% tree
+# \1: all causes
+#   \1.1: Communicable, maternal, neonatal, and nutritional diseases
+#     \1.1.1: HIV/AIDS and sexually transmitted infections
+#       \1.1.1.1: HIV/AIDS
+#         \1.1.1.1.1: HIV/AIDS - drug-susceptible tuberculosis
+#         \1.1.1.1.2: HIV/AIDS - multidrug-resistant tuberculosis without extensive drug resistance
+#         \1.1.1.1.3: HIV/AIDS - extensively drug-resistant tuberculosis
+#         \1.1.1.1.4: HIV/AIDS resulting in other diseases
+#       \1.1.1.2: sexually transmitted infections excluding HIV
+#         \1.1.1.2.1: syphilis
+#         \1.1.1.2.2: chlamydial infection
+#         \1.1.1.2.3: gonococcal infection
+#         \1.1.1.2.4: trichomoniasis
+#         \1.1.1.2.5: genital herpes
+#         \1.1.1.2.6: other sexually transmitted infections
+#     \1.1.2: respiratory infections and tuberculosis
+#       \1.1.2.1: tuberculosis
+#         \1.1.2.1.1: latent tuberculosis infection
+#         \1.1.2.1.2: drug-susceptible tuberculosis
+#         \1.1.2.1.3: multidrug-resistant tuberculosis without extensive drug resistance
+#         \1.1.2.1.4: extensively drug-resistant tuberculosis
+#       \1.1.2.2: lower respiratory infections
+#       \1.1.2.3: upper respiratory infections
+#       \1.1.2.4: otitis media
+#     \1.1.3: enteric infections
+#       \1.1.3.1: diarrheal diseases
+#       \1.1.3.2: typhoid and paratyphoid
+#         \1.1.3.2.1: typhoid fever
+#         \1.1.3.2.2: paratyphoid fever
+#       \1.1.3.3: invasive non-typhoidal salmonella (iNTS)
+#       \1.1.3.4: other intestinal infectious diseases
+#     \1.1.4: neglected tropical diseases and malaria
+#       \1.1.4.1: malaria
+#       \1.1.4.2: chagas disease
+#       \1.1.4.3: leishmaniasis
+#         \1.1.4.3.1: visceral leishmaniasis
+#         \1.1.4.3.2: cutaneous and mucocutaneous leishmaniasis
+#       \1.1.4.4: african trypanosomiasis
+#       \1.1.4.5: schistosomiasis
+#       \1.1.4.6: cysticercosis
+#       \1.1.4.7: cystic echinococcosis
+#       \1.1.4.8: lymphatic filariasis
+#       \1.1.4.9: onchocerciasis
+#       \1.1.4.10: trachoma
+#       \1.1.4.11: dengue
+#       \1.1.4.12: yellow fever
+#       \1.1.4.13: rabies
+#       \1.1.4.14: intestinal nematode infections
+#         \1.1.4.14.1: ascariasis
+#         \1.1.4.14.2: trichuriasis
+#         \1.1.4.14.3: hookworm disease
+#       \1.1.4.15: food-borne trematodiases
+#       \1.1.4.16: leprosy
+#       \1.1.4.17: ebola
+#       \1.1.4.18: zika virus
+#       \1.1.4.19: guinea worm disease
+#       \1.1.4.20: other neglected tropical diseases
+#     \1.1.5: other infectious diseases
+#       \1.1.5.1: meningitis
+#       \1.1.5.2: encephalitis
+#       \1.1.5.3: diphtheria
+#       \1.1.5.4: whooping cough
+#       \1.1.5.5: tetanus
+#       \1.1.5.6: measles
+#       \1.1.5.7: varicella and herpes zoster
+#       \1.1.5.8: acute hepatitis
+#         \1.1.5.8.1: acute hepatitis A
+#         \1.1.5.8.2: acute hepatitis B
+#         \1.1.5.8.3: acute hepatitis C
+#         \1.1.5.8.4: acute hepatitis E
+#       \1.1.5.9: other unspecified infectious diseases
+#     \1.1.6: maternal and neonatal disorders
+#       \1.1.6.1: maternal disorders
+#         \1.1.6.1.1: maternal hemorrhage
+#         \1.1.6.1.2: maternal sepsis and other maternal infections
+#         \1.1.6.1.3: maternal hypertensive disorders
+#         \1.1.6.1.4: maternal obstructed labor and uterine rupture
+#         \1.1.6.1.5: maternal abortion and miscarriage
+#         \1.1.6.1.6: ectopic pregnancy
+#         \1.1.6.1.7: indirect maternal deaths
+#         \1.1.6.1.8: late maternal deaths
+#         \1.1.6.1.9: maternal deaths aggravated by HIV/AIDS
+#         \1.1.6.1.10: other maternal disorders
+#       \1.1.6.2: neonatal disorders
+#         \1.1.6.2.1: neonatal preterm birth
+#         \1.1.6.2.2: neonatal encephalopathy due to birth asphyxia and trauma
+#         \1.1.6.2.3: neonatal sepsis and other neonatal infections
+#         \1.1.6.2.4: hemolytic disease and other neonatal jaundice
+#         \1.1.6.2.5: other neonatal disorders
+#     \1.1.7: nutritional deficiencies
+#       \1.1.7.1: protein-energy malnutrition
+#       \1.1.7.2: iodine deficiency
+#       \1.1.7.3: vitamin A deficiency
+#       \1.1.7.4: dietary iron deficiency
+#       \1.1.7.5: other nutritional deficiencies
+#   \1.2: non-communicable diseases
+#     \1.2.1: neoplasms
+#       \1.2.1.1: lip and oral cavity cancer
+#       \1.2.1.2: nasopharynx cancer
+#       \1.2.1.3: other pharynx cancer
+#       \1.2.1.4: esophageal cancer
+#       \1.2.1.5: stomach cancer
+#       \1.2.1.6: colon and rectum cancer
+#       \1.2.1.7: liver cancer
+#         \1.2.1.7.1: liver cancer due to hepatitis B
+#         \1.2.1.7.2: liver cancer due to hepatitis C
+#         \1.2.1.7.3: liver cancer due to alcohol use
+#         \1.2.1.7.4: liver cancer due to NASH
+#         \1.2.1.7.5: liver cancer due to other causes
+#       \1.2.1.8: gallbladder and biliary tract cancer
+#       \1.2.1.9: pancreatic cancer
+#       \1.2.1.10: larynx cancer
+#       \1.2.1.11: Tracheal, bronchus, and lung cancer
+#       \1.2.1.12: malignant skin melanoma
+#       \1.2.1.13: non-melanoma skin cancer
+#         \1.2.1.13.1: non-melanoma skin cancer (squamous-cell carcinoma)
+#         \1.2.1.13.2: non-melanoma skin cancer (basal-cell carcinoma)
+#       \1.2.1.14: breast cancer
+#       \1.2.1.15: cervical cancer
+#       \1.2.1.16: uterine cancer
+#       \1.2.1.17: ovarian cancer
+#       \1.2.1.18: prostate cancer
+#       \1.2.1.19: testicular cancer
+#       \1.2.1.20: kidney cancer
+#       \1.2.1.21: bladder cancer
+#       \1.2.1.22: brain and central nervous system cancer
+#       \1.2.1.23: thyroid cancer
+#       \1.2.1.24: mesothelioma
+#       \1.2.1.25: hodgkin lymphoma
+#       \1.2.1.26: Non-Hodgkin lymphoma
+#       \1.2.1.27: multiple myeloma
+#       \1.2.1.28: leukemia
+#         \1.2.1.28.1: acute lymphoid leukemia
+#         \1.2.1.28.2: chronic lymphoid leukemia
+#         \1.2.1.28.3: acute myeloid leukemia
+#         \1.2.1.28.4: chronic myeloid leukemia
+#         \1.2.1.28.5: other leukemia
+#       \1.2.1.29: other malignant neoplasms
+#       \1.2.1.30: other neoplasms
+#         \1.2.1.30.1: Myelodysplastic, myeloproliferative, and other hematopoietic neoplasms
+#         \1.2.1.30.2: benign and in situ intestinal neoplasms
+#         \1.2.1.30.3: benign and in situ cervical and uterine neoplasms
+#         \1.2.1.30.4: other benign and in situ neoplasms
+#     \1.2.2: cardiovascular diseases
+#       \1.2.2.1: rheumatic heart disease
+#       \1.2.2.2: ischemic heart disease
+#       \1.2.2.3: stroke
+#         \1.2.2.3.1: ischemic stroke
+#         \1.2.2.3.2: intracerebral hemorrhage
+#         \1.2.2.3.3: subarachnoid hemorrhage
+#       \1.2.2.4: hypertensive heart disease
+#       \1.2.2.5: non-rheumatic valvular heart disease
+#         \1.2.2.5.1: non-rheumatic calcific aortic valve disease
+#         \1.2.2.5.2: non-rheumatic degenerative mitral valve disease
+#         \1.2.2.5.3: other non-rheumatic valve diseases
+#       \1.2.2.6: cardiomyopathy and myocarditis
+#         \1.2.2.6.1: myocarditis
+#         \1.2.2.6.2: alcoholic cardiomyopathy
+#         \1.2.2.6.3: other cardiomyopathy
+#       \1.2.2.7: atrial fibrillation and flutter
+#       \1.2.2.8: aortic aneurysm
+#       \1.2.2.9: peripheral artery disease
+#       \1.2.2.10: endocarditis
+#       \1.2.2.11: other cardiovascular and circulatory diseases
+#     \1.2.3: chronic respiratory diseases
+#       \1.2.3.1: chronic obstructive pulmonary disease
+#       \1.2.3.2: pneumoconiosis
+#         \1.2.3.2.1: silicosis
+#         \1.2.3.2.2: asbestosis
+#         \1.2.3.2.3: coal workers pneumoconiosis
+#         \1.2.3.2.4: other pneumoconiosis
+#       \1.2.3.3: asthma
+#       \1.2.3.4: interstitial lung disease and pulmonary sarcoidosis
+#       \1.2.3.5: other chronic respiratory diseases
+#     \1.2.4: digestive diseases
+#       \1.2.4.1: cirrhosis and other chronic liver diseases
+#         \1.2.4.1.1: cirrhosis and other chronic liver diseases due to hepatitis B
+#         \1.2.4.1.2: cirrhosis and other chronic liver diseases due to hepatitis C
+#         \1.2.4.1.3: cirrhosis and other chronic liver diseases due to alcohol use
+#         \1.2.4.1.4: cirrhosis and other chronic liver diseases due to NAFLD
+#         \1.2.4.1.5: cirrhosis and other chronic liver diseases due to other causes
+#       \1.2.4.2: upper digestive system diseases
+#         \1.2.4.2.1: peptic ulcer disease
+#         \1.2.4.2.2: gastritis and duodenitis
+#         \1.2.4.2.3: gastroesophageal reflux disease
+#       \1.2.4.3: appendicitis
+#       \1.2.4.4: paralytic ileus and intestinal obstruction
+#       \1.2.4.5: Inguinal, femoral, and abdominal hernia
+#       \1.2.4.6: inflammatory bowel disease
+#       \1.2.4.7: vascular intestinal disorders
+#       \1.2.4.8: gallbladder and biliary diseases
+#       \1.2.4.9: pancreatitis
+#       \1.2.4.10: other digestive diseases
+#     \1.2.5: neurological disorders
+#       \1.2.5.1: Alzheimer's disease and other dementias
+#       \1.2.5.2: Parkinson's disease
+#       \1.2.5.3: idiopathic epilepsy
+#       \1.2.5.4: multiple sclerosis
+#       \1.2.5.5: motor neuron disease
+#       \1.2.5.6: headache disorders
+#         \1.2.5.6.1: migraine
+#         \1.2.5.6.2: tension-type headache
+#       \1.2.5.7: other neurological disorders
+#     \1.2.6: mental disorders
+#       \1.2.6.1: schizophrenia
+#       \1.2.6.2: depressive disorders
+#         \1.2.6.2.1: major depressive disorder
+#         \1.2.6.2.2: dysthymia
+#       \1.2.6.3: bipolar disorder
+#       \1.2.6.4: anxiety disorders
+#       \1.2.6.5: eating disorders
+#         \1.2.6.5.1: anorexia nervosa
+#         \1.2.6.5.2: bulimia nervosa
+#       \1.2.6.6: autism spectrum disorders
+#       \1.2.6.7: attention-deficit/hyperactivity disorder
+#       \1.2.6.8: conduct disorder
+#       \1.2.6.9: idiopathic developmental intellectual disability
+#       \1.2.6.10: other mental disorders
+#     \1.2.7: substance use disorders
+#       \1.2.7.1: alcohol use disorders
+#       \1.2.7.2: drug use disorders
+#         \1.2.7.2.1: opioid use disorders
+#         \1.2.7.2.2: cocaine use disorders
+#         \1.2.7.2.3: amphetamine use disorders
+#         \1.2.7.2.4: cannabis use disorders
+#         \1.2.7.2.5: other drug use disorders
+#     \1.2.8: diabetes and kidney diseases
+#       \1.2.8.1: diabetes mellitus
+#         \1.2.8.1.1: diabetes mellitus type 1
+#         \1.2.8.1.2: diabetes mellitus type 2
+#       \1.2.8.2: chronic kidney disease
+#         \1.2.8.2.1: chronic kidney disease due to diabetes mellitus type 1
+#         \1.2.8.2.2: chronic kidney disease due to diabetes mellitus type 2
+#         \1.2.8.2.3: chronic kidney disease due to hypertension
+#         \1.2.8.2.4: chronic kidney disease due to glomerulonephritis
+#         \1.2.8.2.5: chronic kidney disease due to other and unspecified causes
+#       \1.2.8.3: acute glomerulonephritis
+#     \1.2.9: skin and subcutaneous diseases
+#       \1.2.9.1: dermatitis
+#         \1.2.9.1.1: atopic dermatitis
+#         \1.2.9.1.2: contact dermatitis
+#         \1.2.9.1.3: seborrhoeic dermatitis
+#       \1.2.9.2: psoriasis
+#       \1.2.9.3: bacterial skin diseases
+#         \1.2.9.3.1: cellulitis
+#         \1.2.9.3.2: pyoderma
+#       \1.2.9.4: scabies
+#       \1.2.9.5: fungal skin diseases
+#       \1.2.9.6: viral skin diseases
+#       \1.2.9.7: acne vulgaris
+#       \1.2.9.8: alopecia areata
+#       \1.2.9.9: pruritus
+#       \1.2.9.10: urticaria
+#       \1.2.9.11: decubitus ulcer
+#       \1.2.9.12: other skin and subcutaneous diseases
+#     \1.2.10: sense organ diseases
+#       \1.2.10.1: blindness and vision loss
+#         \1.2.10.1.1: glaucoma
+#         \1.2.10.1.2: cataract
+#         \1.2.10.1.3: age-related macular degeneration
+#         \1.2.10.1.4: refraction disorders
+#         \1.2.10.1.5: near vision loss
+#         \1.2.10.1.6: other vision loss
+#       \1.2.10.2: age-related and other hearing loss
+#       \1.2.10.3: other sense organ diseases
+#     \1.2.11: musculoskeletal disorders
+#       \1.2.11.1: rheumatoid arthritis
+#       \1.2.11.2: osteoarthritis
+#         \1.2.11.2.1: osteoarthritis hip
+#         \1.2.11.2.2: osteoarthritis knee
+#         \1.2.11.2.3: osteoarthritis hand
+#         \1.2.11.2.4: osteoarthritis other
+#       \1.2.11.3: low back pain
+#       \1.2.11.4: neck pain
+#       \1.2.11.5: gout
+#       \1.2.11.6: other musculoskeletal disorders
+#     \1.2.12: other non-communicable diseases
+#       \1.2.12.1: congenital birth defects
+#         \1.2.12.1.1: neural tube defects
+#         \1.2.12.1.2: congenital heart anomalies
+#         \1.2.12.1.3: orofacial clefts
+#         \1.2.12.1.4: down syndrome
+#         \1.2.12.1.5: turner syndrome
+#         \1.2.12.1.6: klinefelter syndrome
+#         \1.2.12.1.7: other chromosomal abnormalities
+#         \1.2.12.1.8: congenital musculoskeletal and limb anomalies
+#         \1.2.12.1.9: urogenital congenital anomalies
+#         \1.2.12.1.10: digestive congenital anomalies
+#         \1.2.12.1.11: other congenital birth defects
+#       \1.2.12.2: urinary diseases and male infertility
+#         \1.2.12.2.1: urinary tract infections and interstitial nephritis
+#         \1.2.12.2.2: urolithiasis
+#         \1.2.12.2.3: benign prostatic hyperplasia
+#         \1.2.12.2.4: male infertility
+#         \1.2.12.2.5: other urinary diseases
+#       \1.2.12.3: gynecological diseases
+#         \1.2.12.3.1: uterine fibroids
+#         \1.2.12.3.2: polycystic ovarian syndrome
+#         \1.2.12.3.3: female infertility
+#         \1.2.12.3.4: endometriosis
+#         \1.2.12.3.5: genital prolapse
+#         \1.2.12.3.6: premenstrual syndrome
+#         \1.2.12.3.7: other gynecological diseases
+#       \1.2.12.4: hemoglobinopathies and hemolytic anemias
+#         \1.2.12.4.1: thalassemias
+#         \1.2.12.4.2: thalassemias trait
+#         \1.2.12.4.3: sickle cell disorders
+#         \1.2.12.4.4: sickle cell trait
+#         \1.2.12.4.5: G6PD deficiency
+#         \1.2.12.4.6: G6PD trait
+#         \1.2.12.4.7: other hemoglobinopathies and hemolytic anemias
+#       \1.2.12.5: Endocrine, metabolic, blood, and immune disorders
+#       \1.2.12.6: oral disorders
+#         \1.2.12.6.1: caries of deciduous teeth
+#         \1.2.12.6.2: caries of permanent teeth
+#         \1.2.12.6.3: periodontal diseases
+#         \1.2.12.6.4: edentulism
+#         \1.2.12.6.5: other oral disorders
+#       \1.2.12.7: sudden infant death syndrome
+#   \1.3: injuries
+#     \1.3.1: transport injuries
+#       \1.3.1.1: road injuries
+#         \1.3.1.1.1: pedestrian road injuries
+#         \1.3.1.1.2: cyclist road injuries
+#         \1.3.1.1.3: motorcyclist road injuries
+#         \1.3.1.1.4: motor vehicle road injuries
+#         \1.3.1.1.5: other road injuries
+#       \1.3.1.2: other transport injuries
+#     \1.3.2: unintentional injuries
+#       \1.3.2.1: falls
+#       \1.3.2.2: drowning
+#       \1.3.2.3: Fire, heat, and hot substances
+#       \1.3.2.4: poisonings
+#         \1.3.2.4.1: poisoning by carbon monoxide
+#         \1.3.2.4.2: poisoning by other means
+#       \1.3.2.5: exposure to mechanical forces
+#         \1.3.2.5.1: unintentional firearm injuries
+#         \1.3.2.5.2: other exposure to mechanical forces
+#       \1.3.2.6: adverse effects of medical treatment
+#       \1.3.2.7: animal contact
+#         \1.3.2.7.1: venomous animal contact
+#         \1.3.2.7.2: non-venomous animal contact
+#       \1.3.2.8: foreign body
+#         \1.3.2.8.1: pulmonary aspiration and foreign body in airway
+#         \1.3.2.8.2: foreign body in eyes
+#         \1.3.2.8.3: foreign body in other body part
+#       \1.3.2.9: environmental heat and cold exposure
+#       \1.3.2.10: exposure to forces of nature
+#       \1.3.2.11: other unintentional injuries
+#     \1.3.3: self-harm and interpersonal violence
+#       \1.3.3.1: self-harm
+#         \1.3.3.1.1: self-harm by firearm
+#         \1.3.3.1.2: self-harm by other specified means
+#       \1.3.3.2: interpersonal violence
+#         \1.3.3.2.1: physical violence by firearm
+#         \1.3.3.2.2: physical violence by sharp object
+#         \1.3.3.2.3: sexual violence
+#         \1.3.3.2.4: physical violence by other means
+#       \1.3.3.3: conflict and terrorism
+#       \1.3.3.4: executions and police conflict
+#   \1.4: total cancers
+#   \1.5: total burden related to hepatitis B
+#   \1.6: total burden related to hepatitis C
+#   \1.7: total burden related to non-alcoholic fatty liver disease (NAFLD)
+gbd_reis() %>% tree
+# \1: all risk factors
+#       \1: high temperature
+#   \1.1: environmental/occupational risks
+#     \1.1.1: unsafe water, sanitation, and handwashing
+#       \1.1.1.1: unsafe water source
+#       \1.1.1.2: unsafe sanitation
+#       \1.1.1.3: no access to handwashing facility
+#     \1.1.2: air pollution
+#       \1.1.2.1: particulate matter pollution
+#         \1.1.2.1.1: ambient particulate matter pollution
+#         \1.1.2.1.2: household air pollution from solid fuels
+#       \1.1.2.2: ambient ozone pollution
+#     \1.1.3: suboptimal temperature
+#     \1.1.4: other environmental risks
+#       \1.1.4.1: residential radon
+#       \1.1.4.2: lead exposure
+#     \1.1.5: occupational risks
+#       \1.1.5.1: occupational carcinogens
+#         \1.1.5.1.1: occupational exposure to asbestos
+#         \1.1.5.1.2: occupational exposure to arsenic
+#         \1.1.5.1.3: occupational exposure to benzene
+#         \1.1.5.1.4: occupational exposure to beryllium
+#         \1.1.5.1.5: occupational exposure to cadmium
+#         \1.1.5.1.6: occupational exposure to chromium
+#         \1.1.5.1.7: occupational exposure to diesel engine exhaust
+#         \1.1.5.1.8: occupational exposure to formaldehyde
+#         \1.1.5.1.9: occupational exposure to nickel
+#         \1.1.5.1.10: occupational exposure to polycyclic aromatic hydrocarbons
+#         \1.1.5.1.11: occupational exposure to silica
+#         \1.1.5.1.12: occupational exposure to sulfuric acid
+#         \1.1.5.1.13: occupational exposure to trichloroethylene
+#       \1.1.5.2: occupational asthmagens
+#       \1.1.5.3: occupational particulate matter, gases, and fumes
+#       \1.1.5.4: occupational noise
+#       \1.1.5.5: occupational injuries
+#       \1.1.5.6: occupational ergonomic factors
+#   \1.2: behavioral risks
+#     \1.2.1: child and maternal malnutrition
+#       \1.2.1.1: suboptimal breastfeeding
+#         \1.2.1.1.1: non-exclusive breastfeeding
+#         \1.2.1.1.2: discontinued breastfeeding
+#       \1.2.1.2: child growth failure
+#         \1.2.1.2.1: child underweight
+#         \1.2.1.2.2: child wasting
+#         \1.2.1.2.3: child stunting
+#       \1.2.1.3: low birth weight and short gestation
+#         \1.2.1.3.1: short gestation
+#         \1.2.1.3.2: low birth weight
+#       \1.2.1.4: iron deficiency
+#       \1.2.1.5: vitamin A deficiency
+#       \1.2.1.6: zinc deficiency
+#     \1.2.2: tobacco
+#       \1.2.2.1: smoking
+#       \1.2.2.2: chewing tobacco
+#       \1.2.2.3: secondhand smoke
+#     \1.2.3: alcohol use
+#     \1.2.4: drug use
+#     \1.2.5: dietary risks
+#       \1.2.5.1: diet low in fruits
+#       \1.2.5.2: diet low in vegetables
+#       \1.2.5.3: diet low in legumes
+#       \1.2.5.4: diet low in whole grains
+#       \1.2.5.5: diet low in nuts and seeds
+#       \1.2.5.6: diet low in milk
+#       \1.2.5.7: diet high in red meat
+#       \1.2.5.8: diet high in processed meat
+#       \1.2.5.9: diet high in sugar-sweetened beverages
+#       \1.2.5.10: diet low in fiber
+#       \1.2.5.11: diet low in calcium
+#       \1.2.5.12: diet low in seafood omega-3 fatty acids
+#       \1.2.5.13: diet low in polyunsaturated fatty acids
+#       \1.2.5.14: diet high in trans fatty acids
+#       \1.2.5.15: diet high in sodium
+#     \1.2.6: intimate partner violence
+#     \1.2.7: childhood sexual abuse and bullying
+#       \1.2.7.1: childhood sexual abuse
+#       \1.2.7.2: bullying victimization
+#     \1.2.8: unsafe sex
+#     \1.2.9: low physical activity
+#   \1.3: metabolic risks
+#     \1.3.1: high fasting plasma glucose
+#     \1.3.2: high LDL cholesterol
+#     \1.3.3: high systolic blood pressure
+#     \1.3.4: high body-mass index
+#     \1.3.5: low bone mineral density
+#     \1.3.6: impaired kidney function
+# \2: etiologies
+#       \2: low temperature
+#   \2.1: cholera
+#   \2.2: non-typhoidal salmonella
+#   \2.3: shigella
+#   \2.4: enteropathogenic E coli
+#   \2.5: enterotoxigenic E coli
+#   \2.6: campylobacter
+#   \2.7: entamoeba
+#   \2.8: cryptosporidium
+#   \2.9: rotavirus
+#   \2.10: aeromonas
+#   \2.11: clostridium difficile
+#   \2.12: norovirus
+#   \2.13: adenovirus
+#   \2.14: influenza
+#   \2.15: pneumococcus
+#   \2.16: H influenzae type B
+#   \2.17: respiratory syncytial virus
+#   \2.18: meningococcal meningitis
+# \3: impairments
+#   \3.1: anemia
+#     \3.1.1: mild anemia
+#     \3.1.2: moderate anemia
+#     \3.1.3: severe anemia
+#   \3.2: epilepsy
+#     \3.2.1: treated epilepsy
+#     \3.2.2: moderate epilepsy
+#     \3.2.3: severe epilepsy
+#   \3.3: Guillain-Barré syndrome
+#   \3.4: hearing loss
+#     \3.4.1: mild hearing loss
+#     \3.4.2: moderate hearing loss
+#     \3.4.3: moderately severe hearing loss
+#     \3.4.4: severe hearing loss
+#     \3.4.5: profound hearing loss
+#     \3.4.6: complete hearing loss
+#   \3.5: heart failure
+#     \3.5.1: mild heart failure
+#     \3.5.2: moderate heart failure
+#     \3.5.3: severe heart failure
+#     \3.5.4: treated heart failure
+#   \3.6: infertility
+#     \3.6.1: primary infertility
+#     \3.6.2: secondary infertility
+#   \3.7: developmental intellectual disability
+#     \3.7.1: borderline intellectual disability
+#     \3.7.2: mild intellectual disability
+#     \3.7.3: moderate intellectual disability
+#     \3.7.4: severe intellectual disability
+#     \3.7.5: profound intellectual disability
+#   \3.8: pelvic inflammatory disease
+#     \3.8.1: moderate pelvic inflammatory disease
+#     \3.8.2: severe pelvic inflammatory disease
+#   \3.9: blindness and vision loss
+#     \3.9.1: moderate vision loss
+#     \3.9.2: severe vision loss
+#     \3.9.3: blindness
+#     \3.9.4: presbyopia
+# \4: injuries
+# \5: amputations
+#   \5.1: amputation of lower limbs, bilateral
+#   \5.2: amputation of upper limbs, bilateral
+#   \5.3: amputation of fingers (excluding thumb)
+#   \5.4: amputation of lower limb, unilateral
+#   \5.5: amputation of upper limb, unilateral
+#   \5.6: amputation of thumb
+#   \5.7: amputation of toe/toes
+# \6: burns
+#   \6.1: lower airway burns
+#   \6.2: Burns, <20% total burned surface area without lower airway burns
+#   \6.3: Burns, >=20% total burned surface area or >= 10% burned surface area if head/neck or hands/wrist involved w/o lower airway burns
+# \7: fractures
+#   \7.1: fracture of clavicle, scapula, or humerus
+#   \7.2: fracture of face bones
+#   \7.3: fracture of foot bones except ankle
+#   \7.4: fracture of hand (wrist and other distal part of hand)
+#   \7.5: fracture of hip
+#   \7.6: fracture of patella, tibia or fibula, or ankle
+#   \7.7: fracture of pelvis
+#   \7.8: fracture of radius and/or ulna
+#   \7.9: fracture of skull
+#   \7.10: fracture of sternum and/or fracture of one or more ribs
+#   \7.11: fracture of vertebral column
+#   \7.12: fracture of femur, other than femoral neck
+# \8: head injuries
+#   \8.1: minor TBI
+#   \8.2: Moderate/Severe TBI
+# \9: spinal injuries
+#   \9.1: spinal cord lesion at neck level
+#   \9.2: spinal cord lesion below neck level
+# \10: minor injuries
+#   \10.1: muscle and tendon injuries, including sprains and strains lesser dislocations
+#   \10.2: foreign body in ear
+#   \10.3: open wound(s)
+#   \10.4: contusion in any part of the body
+#   \10.5: superficial injury of any part of the body
+# \11: other injuries
+#   \11.1: dislocation of hip
+#   \11.2: dislocation of knee
+#   \11.3: dislocation of shoulder
+#   \11.4: foreign body in respiratory system
+#   \11.5: foreign body in GI and urogenital system
+#   \11.6: drowning and nonfatal submersion
+#   \11.7: asphyxiation
+#   \11.8: crush injury
+#   \11.9: nerve injury
+#   \11.10: injury to eyes
+#   \11.11: poisoning requiring urgent care
+#   \11.12: severe chest injury
+#   \11.13: internal hemorrhage in abdomen and pelvis
+#   \11.14: effect of different environmental factors
+#   \11.15: complications following therapeutic procedures
+#   \11.16: multiple fractures, dislocations, crashes, wounds, pains, and strains
+```
+
 Let's take a look at some values:
 
 ```{r}
@@ -641,113 +1318,54 @@ gbd_filter(cause = "cardiovascular diseases", rei = NA)
 gbd_filter(cause = "cardiovascular diseases", rei = "all risk factors", measure = c("deaths", "DALYs"))
 ```
 
-## Playing with the raw data and raw codebook
+## Download more Global Burden of Disease data
 
-You don't really need it, but you can play with the raw data and codebook:
+This requires some work
 
-```{r}
-gbd
-attr(gbd,"codebook")
-```
+Download **GBD data** from the query tool on the Global Health Data Exchange website by the Institute for Health Metrics and Evaluation (IHME). Click [here](https://vizhub.healthdata.org/gbd-results/) to go to the website. 
 
-You can also read in the raw data, and clean it:
+You'll need to create an account first. Click `Sign in`, then `Register`, etc.  
+
+Then go back to the [GBD Results page](https://vizhub.healthdata.org/gbd-results/). It's a huge database, so you can't download everything. 
+
+Enter whatever parameters you want data on.
+
+Then click `Download`, and, for `Include ID values or names`, pick `Names`. When it says "You can also monitor progress `here`", click `here` and then `Download`.
+
+If you want to download more data, with similar parameters, you're in luck, because the query tool remembers what you entered last times. Go back by clicking the left arrow on top of the page, to the left of `Data Download`. It will take you back to the Search page, where you just entered all these parameters. It should remember all the parameters you inputted last time. Do the previous steps all over again...
+
+Go to your `Downloads` folder to look for the downloaded data. After unzipping, the downloaded data folder should have a name similar to this: `IHME-GBD_2019_DATA-64c5a7b3-1`. 
+
+If you haven't done it already, create a root folder for all your downloaded GBD data. Let's call this root folder the *GBD folder*. You can create the GBD folder anywhere and name it whatever you like. Store your data folder anywhere in (a subfolder of) this GBD folder. Your GBD folder could be something like: `Users/johnwilliam/datasets/Global Burden of Disease`, with the data folder `Users/johnwilliam/datasets/Global Burden of Disease/IHME-GBD_2019_DATA-64c5a7b3-1`. Pardon my Mac Speak. Just don't change the names of the data files, because `better` searches for them using these names.
+
+## Set global option in your `.Rprofile` file
+
+Enter the path of your GBD folder (e.g., `Users/yourname/datasets/Global Burden of Disease`) as the default GBD path via global options set in your `.Rprofile` file. It will be used by several `better` functions. It is not required, since you can also set global options manually in each session, or even set the path manually for each function call (see below). But it's easier to take care of this once and for all in `.Rprofile`. 
+
+It will look like this:
 
 ```{r, eval = FALSE}
-gbd_data_raw <- gbd_data_read()
-gbd_data_raw
-gbd_data_clean(gbd_data_raw)
-gbd # same
+options(better.gbd_path = "/Users/yourname/datasets/Global Burden of Disease")
 ```
 
-The same is true for the codebook:
+If you haven't used `.Rprofile` before, it's a hidden file with code that R runs at startup. It should be located in your home/user folder (e.g., `Users/yourname/.Rprofile`). Learn more about `.Rprofile` on the [Posit Support page](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
 
-```{r}
-gbd_codebook_raw <- gbd_codebook_read()
-str(gbd_codebook_raw)
-identical(gbd_codebook_clean(gbd_codebook_raw), attr(gbd,"codebook"))
+For the option you just set in your Rprofile to take effect, you will need to restart R. On restarting, R will read in your Rprofile, with the edited option. (Alternatively, you could manually run the `options(*)` code chunk.)
+
+<!-- end -->
+
+## Beyond the starter dataset
+
+To learn more about using `better`, run `better_vignette(better)` to access the pre-installed HTML vignette. 
+
+```{r, eval = FALSE}
+library(better)
+?better_vignette
+better_vignette(better)
 ```
 
-## Effect of nudges
+Why not just have all of that info in this regular vignette here? Well, the vignette requires some setup (e.g., downloading GBD data). But regular vignettes are built from R code at the time of installation, and thus require everything to already be set up correctly. A pre-installed HTML is more forgiving.
 
-Get the effect size for behavioral interventions aka *nudges* with `better::nudge_to_behavior_d`. This returns an object of the `better_effect` class. It's basically a list containing the effect size, the confidence interval, and some other metadata. It's printed in a useful way.
+## Thanks
 
-```{r}
-eff <- nudge_to_behavior_d()
-eff
-class(eff)
-str(eff)
-eff$value
-```
-
-Get the full explanation with `better::explanation`.
-
-```{r}
-eff %>%
-  explanation
-```
-
-The estimate above averaged over all categories of behaviors and nudges. Let's now look at the impact for specific categories of behaviors and nudges:
-
-```{r}
-nudge_to_behavior_d(behavior = "health")
-nudge_to_behavior_d(behavior = "food")
-nudge_to_behavior_d(nudge = "assistance")
-nudge_to_behavior_d(nudge = "structure")
-nudge_to_behavior_d(behavior = "food", nudge = "structure")
-nudge_to_behavior_d(behavior = "health", nudge = "information")
-```
-
-You can also access the dataset of Cohen's *d*'s.
-
-```{r}
-nudge_data()
-```
-
-Proportions
-
-```{r}
-nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
-  print %>%
-  behavior_d_to_pct(cause = "cardiovascular diseases") 
-nudge_to_behavior_d(behavior = "health", nudge = "information") %>%
-  behavior_d_to_pct(cause = "cardiovascular diseases") %>% 
-  explanation
-```
-
-The estimates of the proportions are based on the GBD data on summary exposure values, which you can access like this:
-
-```{r}
-gbd_filter(measure = "summary exposure value")
-```
-
-
-
-```{r}
-# nudge_to_behavior_d("information") %>% print %>%
-#   behavior_d_to_pct %>% print %>%
-#   behavior_pct_to_disease("cardiovascular disease")
-# 
-# nudge("information") %>%
-#   disease("cardiovascular disease") %>%
-#   explanation
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
+I'd `better` thank some folks: I'd like to thank Jenna Clark for great feedback and ideas!

@@ -9,7 +9,7 @@ gbd_codebook(..., data)
 \arguments{
 \item{...}{NOT YET IMPLEMENTED: Parts of the codebook you want to subset.}
 
-\item{data}{GBD dataset as \code{gbd_dataset} object}
+\item{data}{GBD dataset, of \code{gbd_dataset} class. By default, \code{gbd} is used, if it exists. To learn more, call \code{better_vignette(better)}.}
 }
 \value{
 GBD codebook, list
@@ -19,17 +19,8 @@ GBD codebook
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+NULL
 }
-\dontrun{
-# If you haven't already:
-# Add the following to your .Rprofile (and restart):
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
-# See `vignette(\"better\")`
-}
-
-# GBD functions by default read data from `gbd`. See `vignette(\"better\")`
-gbd <- gbd_read()
 
 gbd_codebook()
 }

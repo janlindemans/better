@@ -10,14 +10,14 @@ gbd_causes(...)
 \item{...}{Which causes you want a codebook for, string.}
 }
 \value{
-Codebook, dataframe
+Codebook, data frame
 }
 \description{
 Get codebook for GBD causes
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+NULL
 }
-gbd_causes("cardiovascular diseases")
+gbd_causes("diabetes mellitus")
 }

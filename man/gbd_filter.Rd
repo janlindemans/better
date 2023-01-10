@@ -5,15 +5,15 @@
 \title{Subset the Global Burden of Disease dataset}
 \usage{
 gbd_filter(
-  cause = "all causes",
-  measure = "DALYs",
-  metric = "rate",
-  rei = NA,
-  location = "Global",
-  sex = "both",
-  age = "all ages",
-  year = max(data$year),
-  data,
+  cause = get_default("cause"),
+  measure = get_default("measure"),
+  metric = get_default("metric"),
+  rei = get_default("rei"),
+  location = get_default("location"),
+  sex = get_default("sex"),
+  age = get_default("age"),
+  year = get_default("year"),
+  data = NA,
   params = list()
 )
 }
@@ -34,29 +34,30 @@ gbd_filter(
 
 \item{year}{Year of data collection}
 
-\item{data}{GBD dataset, of \code{gbd_dataset} class. By default, \code{gbd} is used, if it exists. Consider \code{gbd <- gbd_read()}. To learn more, call \code{vignette("better")}.}
+\item{data}{GBD dataset, of \code{gbd_dataset} class. By default, \code{gbd} is used, if it exists. To learn more, call \code{better_vignette(better)}.}
 
 \item{params}{List of parameters. Rather than feeding the parameters as arguments, like for instance gbd_filter(cause = "all causes", measure = "DALYs"), you can feed the parameters as a list, like for instance gbd_filter(params = list(cause = "all causes", measure = "DALYs"))}
 }
 \value{
-GBD data for given parameters, as dataframe.
+GBD data for given parameters, as data frame.
 }
 \description{
 Subset the Global Burden of Disease dataset with sensible defaults. Note that \code{argument = NA} means filtering out \code{NA}s, while \code{argument = NULL} means not filtering out anything (keeping all). \code{gbd_filter} is all about the sensible defaults. If you need many arguments to be \code{NULL}, consider using \code{dplyr::filter(gbd, ...)} instead.
 }
+\section{Terms of use}{
+The GBD dataset was created and is maintained by the \href{https://www.healthdata.org/}{Institute for Health Metrics and Evaluation} at the University of Washington. The dataset is owned by the University of Washington, which reserves all rights to it.
+
+Cite the data as follows:
+
+Global Burden of Disease Collaborative Network. \emph{Global Burden of Disease Study 2019 (GBD 2019) Results.} Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from \url{https://vizhub.healthdata.org/gbd-results/}.
+
+The \code{better} package uses the dataset in accordance with the \href{https://www.healthdata.org/Data-tools-practices/data-practices/ihme-free-charge-non-commercial-user-agreement}{IHME free-of-charge non-commercial user agreement}. The authors and owners of the GBD data were not involved in the creation of \code{better}, and bear no responsibility for any possible issues with the representation and/or use of the data.
+}
+
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
-}
-\dontrun{
-# If you haven't already:
-# Add the following to your .Rprofile (and restart):
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
-# See `vignette(\"better\")`
+NULL
 }
 
-# GBD functions by default read data from `gbd`. See `vignette(\"better\")`
-gbd <- gbd_read()
-
-gbd_filter(cause = "cardiovascular diseases")
+gbd_filter(cause = "diabetes mellitus")
 }

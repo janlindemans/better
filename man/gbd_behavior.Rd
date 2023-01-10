@@ -11,27 +11,18 @@ gbd_behavior(..., rei = "Behavioral risks", data)
 
 \item{rei}{Risk factor for the disease, impairment, or etiology}
 
-\item{data}{GBD dataset, of \code{gbd_dataset} class. By default, \code{gbd} is used, if it exists. Consider \code{gbd <- gbd_read()}. To learn more, call \code{vignette("better")}.}
+\item{data}{GBD dataset, of \code{gbd_dataset} class. By default, \code{gbd} is used, if it exists. To learn more, call \code{better_vignette(better)}.}
 }
 \value{
-GBD data for given parameters, as dataframe.
+GBD data for given parameters, as data frame.
 }
 \description{
 Wrapper around \code{gbd_filter}
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
-}
-\dontrun{
-# If you haven't already:
-# Add the following to your .Rprofile (and restart):
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
-# See `vignette(\"better\")`
+NULL
 }
 
-# GBD functions by default read data from `gbd`. See `vignette(\"better\")`
-gbd <- gbd_read()
-
-gbd_behavior(cause = "cardiovascular diseases")
+gbd_behavior(cause = "diabetes mellitus")
 }

@@ -10,14 +10,14 @@ gbd_measures(...)
 \item{...}{Which measures you want a codebook for, string.}
 }
 \value{
-Codebook, dataframe
+Codebook, data frame
 }
 \description{
 Get codebook for GBD measures
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
+NULL
 }
 gbd_measures("DALYs")
 }

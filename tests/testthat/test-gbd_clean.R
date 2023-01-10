@@ -12,6 +12,14 @@
 #   expect_gt(nrow(gbd),1)
 # })
 
+# Set all better options to NULL
+for (i in stringr::str_subset(names(options()),"better\\.")) {
+  print(i)
+  print(.Options[[i]])
+  .Options[[i]] <- NULL
+  print(.Options[[i]])
+}
+
 test_that("Can read codebook files", {
   withr::local_options(
     better.gbd_path = paste0(
@@ -56,18 +64,40 @@ test_that("Can clean codebook", {
   expect_gt(nrow(gbd_cb[[1]]),1)
 })
 
-# TODO: now too time intensive. But at a certain point, fix it, uncomment it:
-# test_that("Saves data", {
-#   withr::local_options(
-#     better.gbd_path = paste0(
-#       "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared",
-#       "/IRB Projects/Health Projects/Health Team/Public datasets on health"
-#       ,"/Global Burden of Disease Study Data"
-#     )
-#   )
-#   gbd_save()
-#   expect_lt(
-#     difftime(Sys.time(),file.info(gbd_rds_path())$ctime,unit="secs"),
-#     1
-#   )
-# })
+if (FALSE) {
+
+  # TODO: now too time intensive. But at a certain point, fix it, uncomment it:
+  test_that("Saves data", {
+    withr::local_options(
+      better.gbd_path = paste0(
+        "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared",
+        "/IRB Projects/Health Projects/Health Team/Public datasets on health"
+        ,"/Global Burden of Disease Study Data"
+      )
+    )
+    gbd_save()
+    expect_lt(
+      difftime(Sys.time(),file.info(gbd_rds_path())$ctime,unit="secs"),
+      1
+    )
+  })
+
+  test_that("Arguments override parameters", {
+    # withr::local_options(
+    #   better.gbd_path = paste0(
+    #     "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared",
+    #     "/IRB Projects/Health Projects/Health Team/Public datasets on health"
+    #     ,"/Global Burden of Disease Study Data"
+    #   )
+    # )
+    pars <- list(
+      sex = "female",
+      year = 2019
+    )
+    print(gbd)
+    expect_equal(unique(gbd_filter(sex = "female")$sex), "female")
+    expect_equal(unique(gbd_filter(params = pars)$sex), "female")
+    expect_equal(unique(gbd_filter(params = pars, sex = "male")$sex), "male")
+  })
+}
+

@@ -21,20 +21,11 @@ Get explanation of \code{better_effect} object
 }
 \examples{
 \dontshow{
-options(better.gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data")
-}
-\dontrun{
-# If you haven't already:
-# Add the following to your .Rprofile (and restart):
-options(better.gbd_path = "/Users/johnwilliam/datasets/Global Burden of Disease data")
-# See `vignette(\"better\")`
-}
-
+NULL
 library(tidyverse)
+}
 
-gbd <- gbd_read()
-
-nudge_to_behavior_d() \%>\%
+nudge_to_behavior_d(nudge = "information", behavior = "health") \%>\%
   behavior_d_to_pct \%>\%
   explanation
 }

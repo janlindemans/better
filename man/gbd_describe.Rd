@@ -4,7 +4,7 @@
 \alias{gbd_describe}
 \title{Describe gbd_dataset object}
 \usage{
-gbd_describe(..., explain = TRUE, summary = FALSE)
+gbd_describe(..., explain = TRUE, summary = FALSE, reference = FALSE)
 }
 \arguments{
 \item{...}{Parameters determining what GBD data you want to describe. Arguments passed on to \code{gbd_filter}.}
@@ -12,6 +12,8 @@ gbd_describe(..., explain = TRUE, summary = FALSE)
 \item{explain}{Whether or not to add an explanation of the measure, logical}
 
 \item{summary}{Whether or not to provide a brief summary instead of a description, logical}
+
+\item{reference}{Whether or not to add a reference, logical}
 }
 \value{
 Description as string
@@ -20,5 +22,5 @@ Description as string
 Describe gbd_dataset object
 }
 \examples{
-gbd_describe(cause = "cardiovascular diseases")
+gbd_describe(cause = "diabetes mellitus")
 }
