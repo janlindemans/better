@@ -188,8 +188,7 @@ gbd_manual <- gbd_data("/Users/johnwilliam/datasets/Global Burden of Disease")
 ```
 ```{r, echo = FALSE, message = FALSE}
 path_gbd <- paste0(
-  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects",
-  "/Health Projects/Health Team/Public datasets on health",
+  "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects/Health Projects/Health Team/Public datasets on health",
   "/Global Burden of Disease Study Data"
 )
 gbd_manual <- gbd_data(path_gbd)

@@ -55,7 +55,6 @@ library(tidyverse)
 nudge("information", behavior = "food") %>% 
   disease("diabetes mellitus") %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> A behavioral intervention in nudge category "information" and behavior category "food" that targets diabetes mellitus saves 85.2 DALYs per 100,000 people, 95% CI [29.5, 157.3].
 ```
 
@@ -80,7 +79,6 @@ disability* or “YLDs” our nudge would save:
 nudge("information", behavior = "food") %>%
   disease("diabetes mellitus", measure = "YLDs") %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> A behavioral intervention in nudge category "information" and behavior category "food" that targets diabetes mellitus saves 46.9 YLDs per 100,000 people, 95% CI [14.0, 95.9].
 ```
 
@@ -93,7 +91,6 @@ nudge("information", behavior = "food") %>%
   disease("diabetes mellitus", measure = "YLDs") %>%
   cost %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> The annual health care costs saved because of reducing YLDs per 100,000 people is $499,525; 95% CI [126,528; 1,178,042].
 ```
 
@@ -111,7 +108,6 @@ nudge("information", behavior = "food") %>%
   cost %>%
   net %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> The annual net cost savings, after deducting campaign costs, is $469,852; 95% CI [69,162; 1,176,064].
 ```
 
@@ -126,7 +122,6 @@ nudge("information", behavior = "food") %>%
   net %>%
   per(350000) %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> Annual net cost of YLDs per 350,000 people saved is $1,644,483; 95% CI [242,066; 4,116,223].
 ```
 
@@ -139,7 +134,6 @@ food-related behaviors.
 ``` r
 nudge("information", behavior = "food") %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> Cohen's d for nudge category "information" and behavior category "food" is 0.44, 95% CI [0.19, 0.70].
 nudge("information", behavior = "food") %>%
   sample_size
@@ -163,7 +157,6 @@ deaths):
 nudge("information", behavior = "food") %>%
   disease("diabetes mellitus", measure = "deaths") %>%
   describe
-#> This is a `better_effect` object. For more details, including terms of use, run `?disease`.
 #> A behavioral intervention in nudge category "information" and behavior category "food" that targets diabetes mellitus saves 1.90 deaths per 100,000 people, 95% CI [0.71, 3.26].
 nudge("information", behavior = "food") %>%
   disease("diabetes mellitus", measure = "deaths") %>%

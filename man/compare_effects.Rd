@@ -29,6 +29,8 @@ compare_effects(
 \item{params}{Not yet developed}
 
 \item{N}{How many comparisons, integer.}
+
+\item{gbdeffects}{GBD effects data frame, by default \code{gbd_effects}.}
 }
 \value{
 The data for the graph plotted, invisible.

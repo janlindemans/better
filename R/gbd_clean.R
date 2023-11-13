@@ -1,3 +1,55 @@
+
+# Strings -----------------------------------------------------------------
+
+txt <- list(
+  bugs = "The `better` package is still in development. For info on reporting bugs, run `?better`.",
+  tou = "For terms of use, call `terms_of_use(.)`.",
+
+  gbd_cite = "Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/",
+  gbd_cite_short = "Global Burden of Disease Collaborative Network (2020)",
+
+  nudge_cite = "Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118",
+  nudge_cite_short = "Mertens, Herberz, Hahnel, & Brosch (2022)",
+
+  gbd_source_short = "Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.",
+  gbd_source = "Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.",
+
+  gbd_source_plus = "Global Burden of Disease Collaborative Network (2020). Used with permission. All rights reserved. For terms of use and more, run `?gbd_filter`.",
+
+  gbd_license_explain = "The Global Burden of Disease dataset is created and maintained by the Institute for Health Metrics and Evaluation at the University of Washington. The dataset is owned by the University of Washington. The `better` package uses the dataset in accordance with the IHME free-of-charge non-commercial user agreement, retrieved from https://www.healthdata.org/Data-tools-practices/data-practices/ihme-free-charge-non-commercial-user-agreement.",
+  gbd_agreement = "TERMS AND CONDITIONS OF USE: IHME follows the University of Washington's website terms and conditions: http://www.washington.edu/online/terms/. Commercial organizations wishing to acquire a license to access and download IHME data should contact services@healthdata.org. For non-commercial users of IHME websites, including all pages and datasets found on the healthdata.org, vizhub.healthdata.org, and ghdx.healthdata.org domains, the following constitute prior written permission, as required under Section 7 of the University of Washington's Website Terms and Conditions of Use. [...] Data made available for download on IHME Websites can be used, shared, modified or built upon by non-commercial users in accordance with the IHME FREE-OF-CHARGE NON-COMMERCIAL USER AGREEMENT. https://www.healthdata.org/data-tools-practices/data-practices/terms-and-conditions",
+  gbd_agreement_acknowledge = "Data Source Acknowledgment. Proper acknowledgment shall be made for the contributions of each party to any Results being published in accordance with generally accepted scientific standards. In any instance when a Publication includes IHME Data or is derived from IHME Data, User shall include the following source identifier: Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.",
+  gbd_agreement_share = "User may not without written permission from UW provide to third parties the ability to download IHME Data Sets from User-provided hosting facilities; User may publish links to IHME's hosting and downloading facilities.",
+  gbd_agreement_5 = "5 Restrictions on Use of the IHME Data and Data Sets. Except as expressly provided in this Agreement, or with written consent from UW, User will not (i) copy, reproduce or duplicate the IHME Data or Data Sets; (ii) reveal, publish, transfer, disclose, disseminate, distribute, assign, rent, lease, loan, license, or otherwise make the IHME Data or Data Sets available to any person or organization other than User's employees who have a \"need to know\" with respect to work they are currently undertaking in the course and scope of their employment for internal research purposes or Publication purposes; (iii) modify, translate, merge, alter, reverse compile/assemble, decrypt, reverse engineer or create derivative works from the IHME Data or Data Sets; (iv) utilize in any manner the IHME Data or Data Sets to develop data sets similar in function to the Data Sets; or (v) knowingly permit or enable any third party to do the foregoing. When using the IHME Data or Data Sets for purposes of a Publication, User shall not use them or refer to UW and/or IHME in any way that conveys, either directly or implicitly, an impression that UW and/or IHME support, promote or endorse User's analyses, conclusions, recommendations, services or products.",
+  gbd_get_license = "Call `gbd_license()` to access the user agreement.",
+
+  gbd_error_missing = "No `gbd_dataset` object provided, and no default object named `gbd` found. To learn more about `gbd` and `gbd_dataset`, call `better_vignette(better)`.",
+
+  gbd_doc_dataset = "Path of the GBD folder, where the data are stored. By default, automatically read from options, namely, `better.gbd_path`, ideally set in .Rprofile. To learn more, call `better_vignette(better)`.",
+
+  better_effect_message = "This is a `better_effect` object. For more details, including terms of use, run `?disease`.",
+  guesstimate = "This is a guesstimate. Although based on aggregated data, it is no substitute for a rigorous impact analysis when worth the effort.",
+  mash = "This calculation makes use of data owned by others."
+)
+txt <- with(txt, c(
+  txt,
+  gbd_boiler = paste0(gbd_source," For more details, call `vignette(\"gbd\")`."),
+  gbd_cite_source = paste0(gbd_cite," Used with permission. All rights reserved. The `better` package uses the dataset in accordance with the IHME free-of-charge non-commercial user agreement, retrieved from https://www.healthdata.org/Data-tools-practices/data-practices/ihme-free-charge-non-commercial-user-agreement.")
+))
+# I used to wrap this, but I think it is better to wrap on demand (and in bulk)
+# old code:
+#txt <- purrr::map(txt, stringr::str_wrap) # after this, will NOT be wrapped
+# note: if you don't want wrapped stuff wrapped, unwrap it with something like stringr::str_squish
+
+txt <- c(
+  txt,
+  gbd_path_dev = "/Users/jwl38/Library/Mobile\ Documents/com~apple~CloudDocs/R\ -\ iCloud/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data in Drive", # big dataset for JW as developper # "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data in Drive",
+  gbd_path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Research\ JW/Data\ JW/Public\ datasets/Global\ Burden\ of\ Disease\ Study\ Data", # local dataset of a user, JW as user #"/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects/Health Projects/Health Team/Public datasets on health/Global Burden of Disease Study Data",
+  gbd_path_show = "/Users/johnwilliam/datasets/Global Burden of Disease data"
+)
+#file.exists(txt$gbd_path_dev)
+#file.exists(txt$gbd_path)
+
 # Developer functions -----------------------------------------------------
 
 dvloptions <- function(path_dev = TRUE) {
@@ -45,10 +97,10 @@ dvlsave <- function(x = "both") {
     gbd_package <- TRUE
   }
   if (gbd_cah) {
-    gbd_save(path = "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects/Health Projects/Health Team/Public datasets on health/Global Burden of Disease Study Data")
+    gbd_save(path = txt$gbd_path)
   }
   if (gbd_package) {
-    gbd_save(path = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data in Drive")
+    gbd_save(path = txt$gbd_path_dev)
   }
   # gbd_save(path = getOption("better.gbd_path"))
   # gbd_save(path = getOption("better.gbd2_path"))
@@ -74,52 +126,6 @@ dvl_before_install <- function() {
 
 
 # Utils -------------------------------------------------------------------
-
-txt <- list(
-  bugs = "The `better` package is still in development. For info on reporting bugs, run `?better`.",
-  tou = "For terms of use, call `terms_of_use(.)`.",
-
-  gbd_cite = "Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 (GBD 2019) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020. Available from https://vizhub.healthdata.org/gbd-results/",
-  gbd_cite_short = "Global Burden of Disease Collaborative Network (2020)",
-
-  nudge_cite = "Mertens, S., Herberz, M., Hahnel, U. J. J., & Brosch, T. (2022). The effectiveness of nudging: A meta-analysis of choice architecture interventions across behavioral domains. Proceedings of the National Academy of Sciences, 119(1), e2107346118. https://doi.org/10.1073/pnas.2107346118",
-  nudge_cite_short = "Mertens, Herberz, Hahnel, & Brosch (2022)",
-
-  gbd_source_short = "Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.",
-  gbd_source = "Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.",
-
-  gbd_source_plus = "Global Burden of Disease Collaborative Network (2020). Used with permission. All rights reserved. For terms of use and more, run `?gbd_filter`.",
-
-  gbd_license_explain = "The Global Burden of Disease dataset is created and maintained by the Institute for Health Metrics and Evaluation at the University of Washington. The dataset is owned by the University of Washington. The `better` package uses the dataset in accordance with the IHME free-of-charge non-commercial user agreement, retrieved from https://www.healthdata.org/Data-tools-practices/data-practices/ihme-free-charge-non-commercial-user-agreement.",
-  gbd_agreement = "TERMS AND CONDITIONS OF USE: IHME follows the University of Washington's website terms and conditions: http://www.washington.edu/online/terms/. Commercial organizations wishing to acquire a license to access and download IHME data should contact services@healthdata.org. For non-commercial users of IHME websites, including all pages and datasets found on the healthdata.org, vizhub.healthdata.org, and ghdx.healthdata.org domains, the following constitute prior written permission, as required under Section 7 of the University of Washington's Website Terms and Conditions of Use. [...] Data made available for download on IHME Websites can be used, shared, modified or built upon by non-commercial users in accordance with the IHME FREE-OF-CHARGE NON-COMMERCIAL USER AGREEMENT. https://www.healthdata.org/data-tools-practices/data-practices/terms-and-conditions",
-  gbd_agreement_acknowledge = "Data Source Acknowledgment. Proper acknowledgment shall be made for the contributions of each party to any Results being published in accordance with generally accepted scientific standards. In any instance when a Publication includes IHME Data or is derived from IHME Data, User shall include the following source identifier: Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.",
-  gbd_agreement_share = "User may not without written permission from UW provide to third parties the ability to download IHME Data Sets from User-provided hosting facilities; User may publish links to IHME's hosting and downloading facilities.",
-  gbd_agreement_5 = "5 Restrictions on Use of the IHME Data and Data Sets. Except as expressly provided in this Agreement, or with written consent from UW, User will not (i) copy, reproduce or duplicate the IHME Data or Data Sets; (ii) reveal, publish, transfer, disclose, disseminate, distribute, assign, rent, lease, loan, license, or otherwise make the IHME Data or Data Sets available to any person or organization other than User's employees who have a \"need to know\" with respect to work they are currently undertaking in the course and scope of their employment for internal research purposes or Publication purposes; (iii) modify, translate, merge, alter, reverse compile/assemble, decrypt, reverse engineer or create derivative works from the IHME Data or Data Sets; (iv) utilize in any manner the IHME Data or Data Sets to develop data sets similar in function to the Data Sets; or (v) knowingly permit or enable any third party to do the foregoing. When using the IHME Data or Data Sets for purposes of a Publication, User shall not use them or refer to UW and/or IHME in any way that conveys, either directly or implicitly, an impression that UW and/or IHME support, promote or endorse User's analyses, conclusions, recommendations, services or products.",
-  gbd_get_license = "Call `gbd_license()` to access the user agreement.",
-
-  gbd_error_missing = "No `gbd_dataset` object provided, and no default object named `gbd` found. To learn more about `gbd` and `gbd_dataset`, call `better_vignette(better)`.",
-
-  gbd_doc_dataset = "Path of the GBD folder, where the data are stored. By default, automatically read from options, namely, `better.gbd_path`, ideally set in .Rprofile. To learn more, call `better_vignette(better)`.",
-
-  better_effect_message = "This is a `better_effect` object. For more details, including terms of use, run `?disease`.",
-  guesstimate = "This is a guesstimate. Although based on aggregated data, it is no substitute for a rigorous impact analysis when worth the effort.",
-  mash = "This calculation makes use of data owned by others."
-)
-txt <- with(txt, c(
-  txt,
-  gbd_boiler = paste0(gbd_source," For more details, call `vignette(\"gbd\")`."),
-  gbd_cite_source = paste0(gbd_cite," Used with permission. All rights reserved. The `better` package uses the dataset in accordance with the IHME free-of-charge non-commercial user agreement, retrieved from https://www.healthdata.org/Data-tools-practices/data-practices/ihme-free-charge-non-commercial-user-agreement.")
-))
-# I used to wrap this, but I think it is better to wrap on demand (and in bulk)
-# old code:
-#txt <- purrr::map(txt, stringr::str_wrap) # after this, will NOT be wrapped
-# note: if you don't want wrapped stuff wrapped, unwrap it with something like stringr::str_squish
-txt <- c(
-  txt,
-  gbd_path_dev = "/Users/jwl38/Library/CloudStorage/GoogleDrive-janwillem.lindemans@gmail.com/My\ Drive/Offline\ Drive/R\ -\ Offline\ Drive/R\ packages\ JW/better/ignore/Global\ Burden\ of\ Disease\ Study\ Data in Drive",
-  gbd_path = "/Users/jwl38/Library/CloudStorage/Box-Box/CAH/CAH Shared/IRB Projects/Health Projects/Health Team/Public datasets on health/Global Burden of Disease Study Data",
-  gbd_path_show = "/Users/johnwilliam/datasets/Global Burden of Disease data"
-)
 
 message_guess <- function(diagnostic = TRUE) {
   msg <- paste0("Important: ",txt$guesstimate)
@@ -3469,7 +3475,7 @@ per <- function(effect, n = 1) {
 #'   describe
 describe <- function(effect) {
   #browser()
-  message(txt$better_effect_message)
+  #message(txt$better_effect_message)
   cat(utils::tail(effect$describe,1))
   invisible(effect)
 }#; describe(nudge("information"))
@@ -3499,10 +3505,12 @@ facts <- function(effect) {
 
 # GBD effects dataframe
 
-gbd_effects_create <- function(x = get_gbd(data, data_missing = TRUE)) {
+gbd_effects_create <- function(data) {
   #dvlload("start")
 
   #browser()
+
+  data <- get_gbd(data, missing(data))
 
   #gbd <- sample_n(gbd, 300) # FOR TESTING
 
@@ -3897,6 +3905,7 @@ country_locations <- function(reis = gbd_reis()$rei) {
 #' @param ... Other
 #' @param params Not yet developed
 #' @param N How many comparisons, integer.
+#' @param gbdeffects GBD effects data frame, by default `gbd_effects`.
 #'
 #' @return The data for the graph plotted, invisible.
 #' @export
@@ -4005,8 +4014,8 @@ compare_effects <- function(
   #   type = 3
   #   ) #%>% print
   ytemp <- y[y$value %in% cutted,]
-  ytemp$rei %>% table
-  ytemp$cause %>% table
+  #ytemp$rei %>% table
+  #ytemp$cause %>% table
   more_reis <- ysaved[!ysaved$rei %in% ytemp$rei,]
   if (length(unique(ytemp$rei)) <= 2) {
     ytemp <- dplyr::bind_rows(
